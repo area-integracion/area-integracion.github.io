@@ -589,7 +589,7 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
         try{
           const {data:{session}}=await db.auth.getSession();
           if(!session)throw new Error('Inicia sesión nuevamente.');
-          const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':cfg.anonKey},body:JSON.stringify({action:linked?'reset':'create',instructor_id:r.id,dni,password})});
+          const response=await fetch(window.NA_SUPABASE.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':window.NA_SUPABASE.anonKey},body:JSON.stringify({action:linked?'reset':'create',instructor_id:r.id,dni,password})});
           const result=await response.json();
           if(!response.ok||!result.ok)throw new Error(result.error||'No se pudo crear el acceso.');
           access.querySelector('#instructorAccessPassword').value='';
