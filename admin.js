@@ -583,7 +583,7 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
         const dni=access.querySelector('#instructorAccessDni').value.trim();
         const password=access.querySelector('#instructorAccessPassword').value;
         const output=access.querySelector('#instructorAccessMessage');
-        if(!/^\\d{8}$/.test(dni)||password.length<10){output.textContent='Ingresa un DNI de 8 dígitos y una clave de 10 caracteres como mínimo.';return;}
+        if(!(dni.length===8 && [...dni].every(c=>c>='0'&&c<='9'))||password.length<10){output.textContent='Ingresa un DNI de 8 dígitos y una clave de 10 caracteres como mínimo.';return;}
         if(linked&&!confirm('¿Restablecer la clave de este instructor?'))return;
         action.disabled=true;output.textContent='Procesando acceso…';
         try{
