@@ -14,8 +14,9 @@
 <h1 id="authTitle">Panel de gestión</h1>
 <p id="authIntro">Acceso para personas autorizadas de Nueva Acrópolis Huancayo.</p>
 
+<div style="display:flex;gap:8px;margin:12px 0"><button type="button" class="secondary-btn" id="loginByEmail" aria-pressed="true">Correo</button><button type="button" class="secondary-btn" id="loginByDni" aria-pressed="false">DNI (instructores)</button></div>
 <form id="loginForm">
-<label>Correo<input id="loginEmail" type="email" required autocomplete="email"></label>
+<label id="loginEmailWrap">Correo<input id="loginEmail" type="email" required autocomplete="email"></label><label id="loginDniWrap" hidden>DNI<input id="loginDni" type="text" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="username"></label>
 <label>Contraseña<input id="loginPassword" type="password" required autocomplete="current-password"></label>
 <button class="primary-btn" type="submit">Iniciar sesión</button>
 </form>
