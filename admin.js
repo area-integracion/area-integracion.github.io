@@ -552,6 +552,34 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
     fields.insertAdjacentHTML('beforeend',`<div class="cm-field cm-availability"><span><strong>Disponibilidad semanal</strong></span><small>Agrega uno o varios bloques. Los horarios usan intervalos de 15 minutos.</small><div id="availabilityRows"></div><button type="button" class="mini-btn" id="addAvailability">+ Añadir horario</button></div>`);
     const renderAv=()=>{const box=$('#availabilityRows'); box.innerHTML=adviceAvailability.map((a,i)=>`<div class="availability-row"><select data-av-day="${i}">${['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].map((x,di)=>`<option value="${di+1}" ${Number(a.dia)===di+1?'selected':''}>${x}</option>`).join('')}</select><input type="time" step="900" data-av-start="${i}" value="${String(a.hora_inicio||'').slice(0,5)}"><span>a</span><input type="time" step="900" data-av-end="${i}" value="${String(a.hora_fin||'').slice(0,5)}"><button type="button" class="mini-btn" data-av-del="${i}">Quitar</button></div>`).join('')||'<p class="admin-dev-note">Aún no hay horarios. Pulsa “+ Añadir horario”.</p>'; box.querySelectorAll('[data-av-del]').forEach(b=>b.onclick=()=>{adviceAvailability.splice(Number(b.dataset.avDel),1);renderAv();});};
     $('#addAvailability').onclick=()=>{adviceAvailability.push({dia:1,hora_inicio:'18:00',hora_fin:'19:00',activo:true});renderAv();}; renderAv();
+    if(r?.id && (window.__naIsAdmin || (window.__naRoles||[]).includes('responsable_asesorias'))){
+      const access=document.createElement('section');
+      access.className='cm-field';
+      access.style.cssText='border-top:1px solid #ddd1b9;padding-top:18px;margin-top:16px';
+      access.innerHTML='<strong>Acceso personal del instructor</strong><p class="admin-dev-note">Crea o restablece su acceso privado. No modifica los horarios ni las reservas.</p><label>DNI (8 dígitos)<input id="instructorAccessDni" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" autocomplete="off" placeholder="DNI del instructor"></label><label>Clave personal (mínimo 10 caracteres)<input id="instructorAccessPassword" type="password" minlength="10" autocomplete="new-password" placeholder="Clave temporal segura"></label><button type="button" class="mini-btn" id="instructorAccessAction">Crear acceso</button><p id="instructorAccessMessage" role="status" aria-live="polite"></p><small>Entrega la clave al instructor por un canal privado. No uses el DNI como clave.</small>';
+      fields.append(access);
+      const action=access.querySelector('#instructorAccessAction');
+      const linked=Boolean(r.usuario_id);
+      action.textContent=linked?'Restablecer clave':'Crear acceso';
+      action.onclick=async()=>{
+        const dni=access.querySelector('#instructorAccessDni').value.trim();
+        const password=access.querySelector('#instructorAccessPassword').value;
+        const output=access.querySelector('#instructorAccessMessage');
+        if(!/^\\d{8}$/.test(dni)||password.length<10){output.textContent='Ingresa un DNI de 8 dígitos y una clave de 10 caracteres como mínimo.';return;}
+        if(linked&&!confirm('¿Restablecer la clave de este instructor?'))return;
+        action.disabled=true;output.textContent='Procesando acceso…';
+        try{
+          const {data:{session}}=await db.auth.getSession();
+          if(!session)throw new Error('Inicia sesión nuevamente.');
+          const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':cfg.anonKey},body:JSON.stringify({action:linked?'reset':'create',instructor_id:r.id,dni,password})});
+          const result=await response.json();
+          if(!response.ok||!result.ok)throw new Error(result.error||'No se pudo crear el acceso.');
+          access.querySelector('#instructorAccessPassword').value='';
+          output.textContent='Acceso '+(linked?'actualizado':'creado')+' correctamente. El instructor puede entrar en instructor.html.';
+        }catch(error){output.textContent=error.message||'No se pudo guardar el acceso.'}
+        finally{action.disabled=false;}
+      };
+    }
   }
   $('#cmFormMsg').textContent='';modal.hidden=false;}
  async function uploadCmImage(el,bucket,prefix){if(!el||!el.files||!el.files[0])return el?.dataset?.existing||null;const f=el.files[0];const ext=(f.name.split('.').pop()||'webp').toLowerCase();const path=`${prefix}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;const up=await db.storage.from(bucket).upload(path,f,{upsert:false,contentType:f.type});if(up.error)throw up.error;return db.storage.from(bucket).getPublicUrl(path).data.publicUrl;}
