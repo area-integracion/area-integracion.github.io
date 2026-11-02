@@ -44,9 +44,27 @@
   const sb=supabase.createClient(cfg.url,cfg.anonKey);
   window.__naAdminSb=sb;
 
+  let loginWithDni=false;
+  const byEmail=document.querySelector('#loginByEmail'),byDni=document.querySelector('#loginByDni');
+  const emailWrap=document.querySelector('#loginEmailWrap'),dniWrap=document.querySelector('#loginDniWrap'),dniInput=document.querySelector('#loginDni');
+  function selectLoginMethod(dni){loginWithDni=dni;emailWrap.hidden=dni;dniWrap.hidden=!dni;loginEmail.required=!dni;dniInput.required=dni;byEmail.setAttribute('aria-pressed',String(!dni));byDni.setAttribute('aria-pressed',String(dni));recoverBtn.hidden=dni;say('');}
+  byEmail.onclick=()=>selectLoginMethod(false);
+  byDni.onclick=()=>selectLoginMethod(true);
   form.onsubmit=async e=>{
     e.preventDefault(); say('Ingresando…');
-    const {error}=await sb.auth.signInWithPassword({email:loginEmail.value.trim(),password:loginPassword.value});
+    let error;
+    if(loginWithDni){
+      try{
+        const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey},body:JSON.stringify({action:'login',dni:dniInput.value.trim(),password:loginPassword.value})});
+        const result=await response.json();
+        if(!response.ok||!result.session)throw new Error('DNI o contraseña incorrectos.');
+        const authResult=await sb.auth.setSession({access_token:result.session.access_token,refresh_token:result.session.refresh_token});
+        error=authResult.error;
+      }catch(ex){error=ex;}
+    }else{
+      const result=await sb.auth.signInWithPassword({email:loginEmail.value.trim(),password:loginPassword.value});
+      error=result.error;
+    }
     if(error){say('No pudimos iniciar sesión. Revisa tu correo y contraseña.','error');return;}
     say(''); await showSession();
   };
