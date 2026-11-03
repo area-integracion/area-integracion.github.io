@@ -372,7 +372,7 @@ function renderSchoolGallery(){
   box.innerHTML=`<div class="gallery-editorial-shell">
     <button class="gallery-collage-nav gallery-collage-prev" aria-label="Ver anteriores">‹</button>
     <div class="gallery-collage-viewport"><div class="gallery-collage-track">${photos.map((f,i)=>`<article class="gallery-collage-item">
-      <button class="gallery-collage-photo" data-open-gallery="${i}" aria-label="Abrir fotografía ${i+1}"><img ${i<10?`src="${gallerySrc(f)}"`:`data-gallery-src="${gallerySrc(f)}"`} alt="Momento compartido ${i+1}" loading="eager" fetchpriority="${i<4?'high':'auto'}" decoding="async" width="480" height="480"></button>
+      <button class="gallery-collage-photo" data-open-gallery="${i}" aria-label="Abrir fotografía ${i+1}"><img data-gallery-src="${gallerySrc(f)}" alt="Momento compartido ${i+1}" loading="lazy" decoding="async" width="480" height="480"></button>
       <button class="gallery-item-like ${isGalleryLiked(i)?'liked':''}" data-like-gallery="${i}" aria-label="Dar corazón a fotografía ${i+1}"><span class="gallery-heart">${isGalleryLiked(i)?'♥':'♡'}</span><span class="gallery-like-count">${isGalleryLiked(i)?'1':'0'}</span></button>
     </article>`).join("")}</div></div>
     <button class="gallery-collage-nav gallery-collage-next" aria-label="Ver siguientes">›</button>
@@ -383,14 +383,21 @@ function renderSchoolGallery(){
   const viewport=box.querySelector('.gallery-collage-viewport');
   const pageWidth=()=>viewport.clientWidth;
   function loadGalleryPage(page){
-    for(let p=Math.max(0,page-1);p<=Math.min(pages-1,page+1);p++){
-      const imgs=box.querySelectorAll('.gallery-collage-item img');
-      for(let i=p*10;i<Math.min((p+1)*10,imgs.length);i++){
-        const img=imgs[i];if(img.dataset.gallerySrc){img.src=img.dataset.gallerySrc;delete img.dataset.gallerySrc;}
+    // Cargar solo la página visible; evitar 20-30 descargas simultáneas.
+    const imgs=box.querySelectorAll('.gallery-collage-item img');
+    for(let i=page*10;i<Math.min((page+1)*10,imgs.length);i++){
+      const img=imgs[i];
+      if(img.dataset.gallerySrc){
+        img.onerror=()=>{
+          img.onerror=null;
+          img.classList.add('gallery-image-unavailable');
+          img.alt='Fotografía no disponible';
+        };
+        img.src=img.dataset.gallerySrc;
+        delete img.dataset.gallerySrc;
       }
     }
   }
-  loadGalleryPage(0);
   box.querySelector('.gallery-collage-prev').onclick=()=>viewport.scrollBy({left:-pageWidth(),behavior:'smooth'});
   box.querySelector('.gallery-collage-next').onclick=()=>viewport.scrollBy({left:pageWidth(),behavior:'smooth'});
   box.querySelectorAll('[data-open-gallery]').forEach(b=>b.onclick=()=>openGallery(Number(b.dataset.openGallery)));
