@@ -372,7 +372,7 @@ function renderSchoolGallery(){
   box.innerHTML=`<div class="gallery-editorial-shell">
     <button class="gallery-collage-nav gallery-collage-prev" aria-label="Ver anteriores">‹</button>
     <div class="gallery-collage-viewport"><div class="gallery-collage-track">${photos.map((f,i)=>`<article class="gallery-collage-item">
-      <button class="gallery-collage-photo" data-open-gallery="${i}" aria-label="Abrir fotografía ${i+1}"><img src="${gallerySrc(f)}" alt="Momento compartido ${i+1}" loading="lazy"></button>
+      <button class="gallery-collage-photo" data-open-gallery="${i}" aria-label="Abrir fotografía ${i+1}"><img src="${gallerySrc(f)}" alt="Momento compartido ${i+1}" loading="${i<10?'eager':'lazy'}" fetchpriority="${i<4?'high':'auto'}" decoding="async" width="480" height="480"></button>
       <button class="gallery-item-like ${isGalleryLiked(i)?'liked':''}" data-like-gallery="${i}" aria-label="Dar corazón a fotografía ${i+1}"><span class="gallery-heart">${isGalleryLiked(i)?'♥':'♡'}</span><span class="gallery-like-count">${isGalleryLiked(i)?'1':'0'}</span></button>
     </article>`).join("")}</div></div>
     <button class="gallery-collage-nav gallery-collage-next" aria-label="Ver siguientes">›</button>
