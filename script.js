@@ -37,7 +37,7 @@ function activityBg(a){
 }
 function autoCover(a){
  const title=(a.nombre||"Actividad").replace(/</g,"&lt;").replace(/>/g,"&gt;");
- return `<div class="event-img auto-activity-cover"><span>NUEVA ACRÓPOLIS</span><b>${title}</b><i>FILOSOFÍA · CULTURA · VOLUNTARIADO</i></div>`;
+ return `<div class="event-img auto-activity-cover"><b>${title}</b><i>FILOSOFÍA · CULTURA · VOLUNTARIADO</i></div>`;
 }
 function nextDate(id){
  const a=ACTIVIDADES_RECURRENTES.find(x=>x.id===id);if(!a)return"";
