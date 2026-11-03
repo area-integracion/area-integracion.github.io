@@ -35,7 +35,11 @@
     if(settingPassword) return;
     if(data.session){
       login.hidden=true; panel.hidden=false;
-      if(sessionLabel) sessionLabel.textContent=data.session.user.email||'';
+      if(sessionLabel){
+         sessionLabel.textContent=data.session.user.email||'';
+         const {data:instructor,error:instructorError}=await sb.from('instructores').select('nombre').eq('usuario_id',data.session.user.id).limit(1).maybeSingle();
+         if(!instructorError && instructor?.nombre) sessionLabel.textContent='Instructor: '+instructor.nombre;
+       }
       await initPrivateModules(data.session.user);
     } else showLoginMode();
   }
