@@ -570,6 +570,12 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
     fields.insertAdjacentHTML('beforeend',`<div class="cm-field cm-availability"><span><strong>Disponibilidad semanal</strong></span><small>Agrega uno o varios bloques. Los horarios usan intervalos de 15 minutos.</small><div id="availabilityRows"></div><button type="button" class="mini-btn" id="addAvailability">+ Añadir horario</button></div>`);
     const renderAv=()=>{const box=$('#availabilityRows'); box.innerHTML=adviceAvailability.map((a,i)=>`<div class="availability-row"><select data-av-day="${i}">${['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].map((x,di)=>`<option value="${di+1}" ${Number(a.dia)===di+1?'selected':''}>${x}</option>`).join('')}</select><input type="time" step="900" data-av-start="${i}" value="${String(a.hora_inicio||'').slice(0,5)}"><span>a</span><input type="time" step="900" data-av-end="${i}" value="${String(a.hora_fin||'').slice(0,5)}"><button type="button" class="mini-btn" data-av-del="${i}">Quitar</button></div>`).join('')||'<p class="admin-dev-note">Aún no hay horarios. Pulsa “+ Añadir horario”.</p>'; box.querySelectorAll('[data-av-del]').forEach(b=>b.onclick=()=>{adviceAvailability.splice(Number(b.dataset.avDel),1);renderAv();});};
     $('#addAvailability').onclick=()=>{adviceAvailability.push({dia:1,hora_inicio:'18:00',hora_fin:'19:00',activo:true});renderAv();}; renderAv();
+    if(r?.id){
+      const calendarSection=document.createElement('section');
+      calendarSection.style.cssText='border-top:1px solid #ddd1b9;padding-top:18px;margin-top:16px';
+      calendarSection.innerHTML='<strong>Google Calendar</strong><p class="admin-dev-note">Sincroniza automáticamente las reservas con el calendario personal del instructor.</p><button type="button" class="mini-btn" disabled title="Pendiente de configurar autorización segura con Google">Conectar Google Calendar</button><p class="admin-dev-note">Pendiente de configuración: aún no se ha habilitado la conexión con Google. Las reservas siguen funcionando normalmente.</p>';
+      fields.append(calendarSection);
+    }
     if(r?.id && (window.__naIsAdmin || (window.__naRoles||[]).includes('responsable_asesorias'))){
       const access=document.createElement('section');
       access.className='cm-field';
