@@ -389,9 +389,16 @@ function renderSchoolGallery(){
       const img=imgs[i];
       if(img.dataset.gallerySrc){
         img.onerror=()=>{
-          img.onerror=null;
-          img.classList.add('gallery-image-unavailable');
-          img.alt='Fotografía no disponible';
+          // Respaldo directo del repositorio si GitHub Pages aún no entrega la imagen.
+          if(!img.dataset.galleryFallback){
+            img.dataset.galleryFallback='1';
+            const filename=img.src.split('/').pop().split('?')[0];
+            img.src='https://raw.githubusercontent.com/area-integracion/area-integracion.github.io/main/img/galeria/'+encodeURIComponent(filename);
+          }else{
+            img.onerror=null;
+            img.classList.add('gallery-image-unavailable');
+            img.alt='Fotografía no disponible';
+          }
         };
         img.loading='lazy';
         img.fetchPriority=i<page*10+3?'high':'low';
