@@ -28,7 +28,7 @@
   function showLoginMode(){
     settingPassword=false;
     login.hidden=false; panel.hidden=true; form.hidden=false; recoverBtn.hidden=false; passwordForm.hidden=true;
-    title.textContent='Panel de gestión'; intro.textContent='Acceso para personas autorizadas de Nueva Acrópolis Huancayo.';
+    title.textContent='Panel de gestión'; intro.textContent='Acceso para personas autorizadas de Integración Huancayo.';
   }
   async function showSession(){
     const {data}=await sb.auth.getSession();
