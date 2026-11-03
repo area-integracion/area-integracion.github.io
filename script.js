@@ -393,6 +393,8 @@ function renderSchoolGallery(){
           img.classList.add('gallery-image-unavailable');
           img.alt='Fotografía no disponible';
         };
+        img.loading='lazy';
+        img.fetchPriority=i<page*10+3?'high':'low';
         img.src=img.dataset.gallerySrc;
         delete img.dataset.gallerySrc;
       }
