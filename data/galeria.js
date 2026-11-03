@@ -109,8 +109,8 @@ const GALERIA = [
   "momento-108.jpg",
   "momento-109.jpg",
   "momento-110.jpg",
-  "momento-111.jpg",
-  "momento-112.jpg",
-  "momento-113.jpg",
-  "momento-114.jpg",
+  "https://raw.githubusercontent.com/area-integracion/area-integracion.github.io/main/img/galeria/momento-111.jpg",
+  "https://raw.githubusercontent.com/area-integracion/area-integracion.github.io/main/img/galeria/momento-112.jpg",
+  "https://raw.githubusercontent.com/area-integracion/area-integracion.github.io/main/img/galeria/momento-113.jpg",
+  "https://raw.githubusercontent.com/area-integracion/area-integracion.github.io/main/img/galeria/momento-114.jpg",
 ];
