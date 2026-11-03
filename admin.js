@@ -573,7 +573,23 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
     if(r?.id){
       const calendarSection=document.createElement('section');
       calendarSection.style.cssText='border-top:1px solid #ddd1b9;padding-top:18px;margin-top:16px';
-      calendarSection.innerHTML='<strong>Google Calendar</strong><p class="admin-dev-note">Sincroniza automáticamente las reservas con el calendario personal del instructor.</p><button type="button" class="mini-btn" disabled title="Pendiente de configurar autorización segura con Google">Conectar Google Calendar</button><p class="admin-dev-note">Pendiente de configuración: aún no se ha habilitado la conexión con Google. Las reservas siguen funcionando normalmente.</p>';
+      calendarSection.innerHTML='<strong>Google Calendar · Gratis</strong><p class="admin-dev-note">Suscribe tu Google Calendar a las asesorías de este instructor, sin membresías ni permisos de Google Cloud. Google actualiza las reservas periódicamente, no en tiempo real.</p><button type="button" class="mini-btn" id="linkFreeCalendar">Vincular mi calendario gratis</button><div id="freeCalendarResult" class="admin-dev-note" role="status"></div>'; 
+       calendarSection.querySelector('#linkFreeCalendar').onclick=async()=>{
+         const btn=calendarSection.querySelector('#linkFreeCalendar'),output=calendarSection.querySelector('#freeCalendarResult');
+         btn.disabled=true;output.textContent='Preparando enlace privado…';
+         try{
+           const {data:{session}}=await db.auth.getSession();
+           if(!session)throw new Error('Inicia sesión nuevamente.');
+           const res=await fetch(window.NA_SUPABASE.url+'/functions/v1/calendario-asesorias',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':window.NA_SUPABASE.anonKey},body:JSON.stringify({instructor_id:r.id})});
+           const data=await res.json();if(!res.ok||!data.ok)throw new Error(data.error||'No se pudo generar el calendario.');
+           output.innerHTML='';
+           const note=document.createElement('p');note.textContent='En Google Calendar (desde computadora): Otros calendarios → + → Desde URL. Pega este enlace privado y pulsa Añadir calendario. No lo compartas: quien lo tenga podrá consultar tus horarios.';
+           const link=document.createElement('input');link.type='text';link.readOnly=true;link.value=data.url;link.style.cssText='width:100%;margin:8px 0;padding:9px';
+           const copy=document.createElement('button');copy.type='button';copy.className='mini-btn';copy.textContent='Copiar enlace privado';copy.onclick=async()=>{try{await navigator.clipboard.writeText(data.url);copy.textContent='¡Copiado!';}catch{link.select();document.execCommand('copy');copy.textContent='¡Copiado!';}};
+           output.append(note,link,copy);
+         }catch(error){output.textContent=error.message||'No se pudo crear el enlace.';}
+         finally{btn.disabled=false;}
+       };
       fields.append(calendarSection);
     }
     if(r?.id && (window.__naIsAdmin || (window.__naRoles||[]).includes('responsable_asesorias'))){
