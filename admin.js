@@ -594,6 +594,14 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
          }catch(error){output.textContent=error.message||'No se pudo crear el enlace.';}
          finally{btn.disabled=false;}
        };
+      const googleBox=document.createElement('div');
+      googleBox.style.cssText='margin-top:16px;padding-top:12px;border-top:1px solid #ddd1b9';
+      googleBox.innerHTML='<strong>Sincronización directa con Google Calendar</strong><p class="admin-dev-note">Conecta tu cuenta para crear las asesorías en Google Calendar. Solo el instructor puede autorizar su propia cuenta.</p><button type="button" class="mini-btn" data-google-connect>Conectar Google Calendar</button> <button type="button" class="mini-btn" data-google-sync>Sincronizar reservas</button><p class="admin-dev-note" data-google-message role="status"></p>';
+      const googleMessage=googleBox.querySelector('[data-google-message]');
+      const googleCall=async(action)=>{const {data:{session}}=await db.auth.getSession();if(!session)throw new Error('Inicia sesión de nuevo.');const response=await fetch(window.NA_SUPABASE.url+'/functions/v1/google-calendar-connect',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token,'apikey':window.NA_SUPABASE.anonKey},body:JSON.stringify({action,instructor_id:r.id})});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.error||'No se pudo conectar');return data;};
+      googleBox.querySelector('[data-google-connect]').onclick=async()=>{googleMessage.textContent='Preparando autorización…';try{const result=await googleCall('start');location.href=result.url;}catch(e){googleMessage.textContent=e.message;}};
+      googleBox.querySelector('[data-google-sync]').onclick=async()=>{googleMessage.textContent='Sincronizando…';try{const result=await googleCall('sync');googleMessage.textContent='Sincronizadas '+result.synced+' reservas.';}catch(e){googleMessage.textContent=e.message;}};
+      calendarSection.append(googleBox);
       fields.append(calendarSection);
     }
     if(r?.id && (window.__naIsAdmin || (window.__naRoles||[]).includes('responsable_asesorias'))){
