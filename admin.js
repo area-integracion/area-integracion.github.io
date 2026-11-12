@@ -231,7 +231,9 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
       ...['integracion','tecnica','difusion','cafeteria','redes','cultura','escolastica-prob','escolastica-miembros'].map(area_id=>sb.rpc('puede_gestionar_area',{p_area_id:area_id}))
     ]);
     const canModule=(r)=>!r?.error&&r.data===true;
+    const areaIds=['integracion','tecnica','difusion','cafeteria','redes','cultura','escolastica-prob','escolastica-miembros'];
     const canArea=pAreas.some(canModule);
+    window.__naModulePerms={talleres:canModule(pTalleres),donaciones:canModule(pDonaciones),lecturas:canModule(pLecturas),asesorias:canModule(pAsesorias),virtudes:canModule(pVirtudes),talleres_virtudes:canModule(pTalleresVirtudes),areas:Object.fromEntries(areaIds.map((id,i)=>[id,canModule(pAreas[i])]))};
     canManageAgenda=isAdmin||roles.includes('jefe_taller')||canModule(pTalleres)||canModule(pTalleresVirtudes);
     const canManageAdvice=isAdmin||roles.includes('responsable_asesorias')||canModule(pAsesorias);
     // Mostrar SOLO los módulos autorizados.
@@ -356,7 +358,7 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
   virtues:{title:'Virtudes',intro:'Administra las virtudes y su significado filosófico.',table:'virtudes',label:'virtud',fields:[['nombre','Nombre de la virtud','text',1],['significado','Significado filosófico','textarea',1],['activo','Virtud activa','checkbox']]}
  };
  function fhtml(f,r){let [k,l,t,req]=f,val=r?.[k]??''; if(t==='file')return `<label class="cm-field"><span>${l}</span><input data-k="${k}" data-existing="${esc2(val)}" type="file" accept="image/jpeg,image/png,image/webp"><small>JPG, PNG o WEBP${val?' · Ya hay una imagen guardada':''}</small></label>`; if(t==='checkbox')return `<label class="cm-field cm-check"><input data-k="${k}" type="checkbox" ${val!==false?'checked':''}> <span>${l}</span></label>`; if(t==='textarea')return `<label class="cm-field"><span>${l}</span><textarea data-k="${k}" rows="${k==='contenido'?10:4}" ${req===1?'required':''}>${esc2(val)}</textarea></label>`; if(t==='select'){let opts=String(req||'').split('|');return `<label class="cm-field"><span>${l}</span><select data-k="${k}">${opts.map(x=>`<option ${String(val)===x?'selected':''}>${x}</option>`).join('')}</select></label>`;} return `<label class="cm-field"><span>${l}</span><input data-k="${k}" type="${t}" value="${esc2(t==='time'?String(val).slice(0,5):val)}" ${req===1?'required':''}></label>`;}
- function allowed(m){const r=window.__naRoles||[];if(window.__naIsAdmin)return true;if(m==='virtues'||m==='areas')return false;return m==='readings'?r.includes('encargado_lecturas'):m==='donations'?r.includes('encargado_donaciones'):m==='advice'?(r.includes('instructor')||r.includes('responsable_asesorias')):false;}
+ function allowed(m){const r=window.__naRoles||[],p=window.__naModulePerms||{};if(window.__naIsAdmin)return true;if(m==='virtues')return !!p.virtudes;if(m==='areas')return Object.values(p.areas||{}).some(Boolean);return m==='readings'?r.includes('encargado_lecturas')||!!p.lecturas:m==='donations'?r.includes('encargado_donaciones')||!!p.donaciones:m==='advice'?(r.includes('instructor')||r.includes('responsable_asesorias')||!!p.asesorias):false;}
  async function open(m){if(!allowed(m)){alert('Tu cuenta no tiene permiso para este módulo.');return;}mode=m;const d=defs[m];manager.hidden=false;$('#cmTitle').textContent=d.title;$('#cmIntro').textContent=d.intro;$('#cmAdd').textContent='+ Nueva '+d.label;if(m==='advice'){
   await renderAdviceBookings();
   await renderAlternateRequests();
