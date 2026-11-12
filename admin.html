@@ -14,7 +14,7 @@
 <h1 id="authTitle">Panel de gestión</h1>
 <p id="authIntro">Acceso para personas autorizadas de Integración Huancayo.</p>
 
-<div style="display:flex;gap:8px;margin:12px 0"><button type="button" class="secondary-btn" id="loginByEmail" aria-pressed="true">Correo</button><button type="button" class="secondary-btn" id="loginByDni" aria-pressed="false">DNI (instructores)</button></div>
+<div style="display:flex;gap:8px;margin:12px 0"><button type="button" class="secondary-btn" id="loginByEmail" aria-pressed="true">Correo</button><button type="button" class="secondary-btn" id="loginByDni" aria-pressed="false">DNI (personal autorizado)</button></div>
 <form id="loginForm">
 <label id="loginEmailWrap">Correo<input id="loginEmail" type="email" required autocomplete="email"></label><label id="loginDniWrap" hidden>DNI<input id="loginDni" type="text" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="username"></label>
 <label>Contraseña<input id="loginPassword" type="password" required autocomplete="current-password"></label>
@@ -89,7 +89,7 @@
     <div><p class="eyebrow">ADMINISTRACIÓN</p><h2>Personas y permisos</h2><p>Registra personas, asigna responsabilidades y prepara su acceso al panel.</p></div>
     <button class="primary-btn" id="addPersonBtn" type="button">+ Agregar persona</button>
   </div>
-  <div class="people-notice">Puedes registrar a alguien aunque todavía no tengas su correo. El acceso se enviará más adelante, cuando tenga correo y la función segura de invitaciones esté activa.</div>
+  <div class="people-notice">Registra a cada persona una sola vez. Puedes asignarle varias responsabilidades y crear o restablecer su acceso con DNI y contraseña.</div>
   <div class="people-list" id="peopleList"><p class="admin-dev-note">Cargando personas…</p></div>
 </section>
 
@@ -101,7 +101,10 @@
    <input type="hidden" id="personId">
    <label>Nombre y apellido<input id="personName" required minlength="3"></label>
    <div class="person-two"><label>Correo <span>(opcional)</span><input id="personEmail" type="email"></label><label>WhatsApp <span>(opcional)</span><input id="personWhatsapp" inputmode="tel"></label></div>
-   <fieldset><legend>Responsabilidades</legend><div class="role-grid" id="roleGrid"></div></fieldset>
+   <fieldset><legend>Acceso al panel</legend><div class="person-two"><label>DNI (8 dígitos)<input id="personDni" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" autocomplete="off"></label><label>Contraseña inicial o nueva <span>(mínimo 10 caracteres; déjala vacía para no cambiarla)</span><input id="personPassword" type="password" minlength="10" maxlength="128" autocomplete="new-password"></label></div><small>El DNI identifica una sola cuenta. La contraseña no se guarda en la ficha de la persona.</small></fieldset>
+   <fieldset><legend>Responsabilidades por módulo</legend><div class="role-grid" id="moduleGrid"></div></fieldset>
+   <fieldset><legend>Responsabilidad por área</legend><div class="role-grid" id="areaModuleGrid"></div></fieldset>
+   <fieldset><legend>Roles adicionales</legend><div class="role-grid" id="roleGrid"></div></fieldset>
    <label class="active-check"><input id="personActive" type="checkbox" checked> Persona activa</label>
    <div class="person-actions"><button class="primary-btn" type="submit">Guardar persona</button><button class="secondary-btn" id="cancelPerson" type="button">Cancelar</button></div>
    <p class="auth-msg" id="personMsg" aria-live="polite"></p>
