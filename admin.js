@@ -667,7 +667,7 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
  async function save(e){e.preventDefault();let d=defs[mode],id=$('#cmId').value,p={},m=$('#cmFormMsg');m.textContent='Guardando…';m.className='auth-msg';try{for(const el of fields.querySelectorAll('[data-k]')){let k=el.dataset.k;if(el.type==='file'){const bucket=mode==='advice'?'instructores':mode==='events'?'eventos':mode==='readings'?'lecturas':mode==='areas'?'areas':'actividades';p[k]=await uploadCmImage(el,bucket,mode);continue;}let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number'&&v!=='')v=Number(v);p[k]=v===''?null:v;}
   if(mode==='readings' && (p.orden===null || p.orden===undefined)){ const mx=rows.reduce((m,r)=>Math.max(m,Number(r.orden)||0),0); p.orden=mx+1; }
   if(mode==='events'){ p.titulo=(p.titulo||'').trim(); if(!p.titulo) throw new Error('El nombre del evento es obligatorio.'); }
-  if(mode==='areas')p.updated_at=new Date().toISOString();
+  if(mode==='areas'){p.foto_portada=p.foto_portada||'';p.updated_at=new Date().toISOString();}
   if(mode==='advice'){
     document.querySelectorAll('[data-av-day]').forEach(el=>{const i=Number(el.dataset.avDay); adviceAvailability[i].dia=el.value;});
     document.querySelectorAll('[data-av-start]').forEach(el=>{const i=Number(el.dataset.avStart); adviceAvailability[i].hora_inicio=el.value;});
