@@ -151,9 +151,10 @@ function openActivity(id,date){
 function activityCard(x){
  return `<button class="space-card" data-act="${x.id}"><div class="space-photo" style="background-image:${activityBg(x)}"></div><div class="space-card-body"><span class="eyebrow">TALLER · CÍRCULO</span><h3>${x.nombre}</h3><p>${x.frase}</p><span class="discover">Conocer →</span></div></button>`
 }
+function areaCover(x){const f=x.fotoPortada||(x.fotos&&x.fotos[0])||x.foto||x.id+"-1.jpg";return /^(https?:|data:|blob:)/i.test(f)?f:`img/espacios/${f}`;}
 function areaCard(x){
- const f=(x.fotos&&x.fotos[0])||x.foto||x.id+"-1.jpg";
- return `<button class="space-card area-card" data-area="${x.id}"><div class="space-photo" style="background-image:url('img/espacios/${f}')"></div><div class="space-card-body"><span class="eyebrow">EQUIPO DE LA ESCUELA</span><h3>${x.nombre}</h3><p>${x.frase}</p><div class="mini-virtues">${x.virtudes.slice(0,4).map(v=>`<span>${v}</span>`).join("")}</div><span class="discover">Conocer el área →</span></div></button>`
+ const cover=areaCover(x);
+ return `<button class="space-card area-card" data-area="${x.id}"><div class="space-photo" style="background-image:url('${cover}')"></div><div class="space-card-body"><span class="eyebrow">EQUIPO DE LA ESCUELA</span><h3>${x.nombre}</h3><p>${x.frase}</p><div class="mini-virtues">${x.virtudes.slice(0,4).map(v=>`<span>${v}</span>`).join("")}</div><span class="discover">Conocer el área →</span></div></button>`
 }
 function renderSpaces(){
  const activityGrid=$("#activitySpacesGrid"); if(activityGrid) activityGrid.innerHTML=ACTIVIDADES_RECURRENTES.map(activityCard).join("");
@@ -163,12 +164,12 @@ function renderSpaces(){
 }
 function openService(id){
  const x=AREAS_SERVICIO.find(a=>a.id===id);if(!x)return;
- const f=(x.fotos&&x.fotos[0])||x.foto||x.id+"-1.jpg";
+ const f=areaCover(x);
  const saludo=x.encargado?`Hola ${x.encargado},`:"Hola,";
  const msg=encodeURIComponent(`${saludo} vi el área de ${x.nombre} en la página de Nueva Acrópolis y me dio curiosidad conocer un poco más. ¿Me brindas información?`);
  const contact=x.whatsapp?`<div class="contact-box"><div><span class="eyebrow">¿TE DIO CURIOSIDAD?</span><p>${x.encargado?`Puedes escribir a <b>${x.encargado}</b> para conocer cómo participar en esta área.`:"Puedes escribirnos para conocer cómo participar en esta área."}</p></div><a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/${x.whatsapp}?text=${msg}">Quiero conocer más →</a></div>`:`<div class="contact-box pending-contact"><div><span class="eyebrow">¿TE DIO CURIOSIDAD?</span><p>Muy pronto podrás contactar directamente a este equipo desde aquí.</p></div></div>`;
  show(`<div class="activity-modal area-modal">
-   <div class="activity-cover zoomable-photo" data-full-image="img/espacios/${f}" style="background-image:url('img/espacios/${f}')"></div>
+   <div class="activity-cover zoomable-photo" data-full-image="${f}" style="background-image:url('${f}')"></div>
    <div class="activity-copy">
      <p class="eyebrow">EQUIPO DE LA ESCUELA</p><h2>${x.nombre}</h2><p class="lead"><em>${x.frase}</em></p>
      <div class="modal-columns"><div><h4>¿Qué hacemos?</h4><p>${x.aprende}</p></div><div><h4>Virtudes que puedes cultivar</h4><div class="virtue-list">${x.virtudes.map(v=>`<span title="${SIGNIFICADO_VIRTUDES[v]||""}">${v}</span>`).join("")}</div></div></div>
