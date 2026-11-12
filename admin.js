@@ -373,7 +373,7 @@ function setupAdviceNavigation(){
  let nav=document.querySelector('#adviceNavigation');
  if(!nav){nav=document.createElement('nav');nav.id='adviceNavigation';nav.setAttribute('aria-label','Secciones de asesorías');nav.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;padding:10px 0;border-bottom:1px solid #ddd1b9';manager.querySelector('.people-toolbar').after(nav);}
  const instructorOnly=!!window.__naInstructorOnly;
- nav.innerHTML=`<button type="button" class="mini-btn" data-advice-view="instructors">${instructorOnly?'Mi perfil':'Instructores'}</button><button type="button" class="mini-btn" data-advice-view="bookings">${instructorOnly?'Mis reservas':'Reservas'}</button>${instructorOnly?'':'<button type="button" class="mini-btn" data-advice-view="requests">Solicitudes</button>'}`;
+ nav.innerHTML=`<button type="button" class="mini-btn" data-advice-view="instructors">${instructorOnly?'Mi perfil':'Instructores'}</button><button type="button" class="mini-btn" data-advice-view="bookings">${instructorOnly?'Mis reservas':'Reservas'}</button><button type="button" class="mini-btn" data-advice-view="requests">Solicitudes de asesoría</button>`;
  nav.querySelectorAll('[data-advice-view]').forEach(b=>b.onclick=()=>setAdviceView(b.dataset.adviceView));
 }
 function setAdviceView(view){
@@ -632,27 +632,7 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
       calendarSection.append(googleBox);
       fields.append(calendarSection);
     }
-    if(r?.id){
-      const requestsSection=document.createElement('section');
-      requestsSection.className='cm-field';
-      requestsSection.style.cssText='border-top:1px solid #ddd1b9;padding-top:18px;margin-top:16px';
-      requestsSection.innerHTML='<strong>Solicitudes de asesoría</strong><p class="admin-dev-note">Solicitudes enviadas por personas interesadas en recibir una asesoría con este instructor.</p><div data-instructor-requests><p class="admin-dev-note">Cargando solicitudes…</p></div>';
-      fields.append(requestsSection);
-      const requestsBox=requestsSection.querySelector('[data-instructor-requests]');
-      const requestsResult=await db.rpc('listar_solicitudes_horario_panel');
-      if(requestsResult.error){
-        requestsBox.innerHTML='<p class="admin-dev-note">No se pudieron cargar las solicitudes: '+esc2(requestsResult.error.message)+'</p>';
-      }else{
-        const ownRequests=(requestsResult.data||[]).filter(x=>Number(x.instructor_id)===Number(r.id));
-        requestsBox.innerHTML=ownRequests.length?ownRequests.map(x=>{
-          const date=new Date(String(x.fecha_preferida)+'T12:00:00').toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
-          const status=String(x.estado||'pendiente').toLowerCase();
-          const phone=String(x.whatsapp_persona||'').replace(/\\D/g,'');
-          const wa=phone.length===9?'51'+phone:phone;
-          return '<div class="activity-admin-row" style="align-items:center"><div class="cm-wide"><div class="cm-row-title">'+esc2(x.nombre_persona||'Solicitud')+'</div><div class="cm-row-sub">'+esc2(date)+' · '+esc2(String(x.hora_preferida||'').slice(0,5))+' · '+esc2(status.charAt(0).toUpperCase()+status.slice(1))+(x.whatsapp_persona?' · '+esc2(x.whatsapp_persona):'')+'</div>'+(x.mensaje?'<div class="cm-row-sub" style="margin-top:5px">“'+esc2(x.mensaje)+'”</div>':'')+'</div><div class="activity-admin-actions">'+(wa?'<a class="mini-btn" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a>':'')+'</div></div>';
-        }).join(''):'<div class="empty-people">Este instructor aún no tiene solicitudes de asesoría.</div>';
-      }
-    }
+
     if(r?.id && (window.__naIsAdmin || (window.__naRoles||[]).includes('responsable_asesorias'))){
       const access=document.createElement('section');
       access.className='cm-field';
