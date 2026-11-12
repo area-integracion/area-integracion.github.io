@@ -228,7 +228,7 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
       sb.rpc('puede_gestionar_modulo',{p_modulo:'asesorias'}),
       sb.rpc('puede_gestionar_modulo',{p_modulo:'virtudes'}),
       sb.rpc('puede_gestionar_modulo',{p_modulo:'talleres_virtudes'}),
-      ...[['integracion','tecnica','difusion','cafeteria','redes','cultura','escolastica-prob','escolastica-miembros'].map(area_id=>sb.rpc('puede_gestionar_area',{p_area_id:area_id}))]
+      ...['integracion','tecnica','difusion','cafeteria','redes','cultura','escolastica-prob','escolastica-miembros'].map(area_id=>sb.rpc('puede_gestionar_area',{p_area_id:area_id}))
     ]);
     const canModule=(r)=>!r?.error&&r.data===true;
     const canArea=pAreas.some(canModule);
