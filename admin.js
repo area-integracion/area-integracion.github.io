@@ -30,18 +30,30 @@
     login.hidden=false; panel.hidden=true; form.hidden=false; recoverBtn.hidden=false; passwordForm.hidden=true;
     title.textContent='Panel de gestión'; intro.textContent='Acceso para personas autorizadas de Integración Huancayo.';
   }
+  let sessionInitPromise=null;
   async function showSession(){
-    const {data}=await sb.auth.getSession();
-    if(settingPassword) return;
-    if(data.session){
-      login.hidden=true; panel.hidden=false;
-      if(sessionLabel){
-         sessionLabel.textContent=data.session.user.email||'';
-         const {data:instructor,error:instructorError}=await sb.from('instructores').select('nombre').eq('usuario_id',data.session.user.id).limit(1).maybeSingle();
-         if(!instructorError && instructor?.nombre) sessionLabel.textContent='Instructor: '+instructor.nombre;
-       }
-      await initPrivateModules(data.session.user);
-    } else showLoginMode();
+    if(sessionInitPromise) return sessionInitPromise;
+    sessionInitPromise=(async()=>{
+      const {data,error}=await sb.auth.getSession();
+      if(settingPassword) return;
+      if(error) throw error;
+      if(data.session){
+        login.hidden=true; panel.hidden=false;
+        if(sessionLabel){
+          sessionLabel.textContent=data.session.user.email||'';
+          const {data:instructor,error:instructorError}=await sb.from('instructores').select('nombre').eq('usuario_id',data.session.user.id).limit(1).maybeSingle();
+          if(!instructorError && instructor?.nombre) sessionLabel.textContent='Instructor: '+instructor.nombre;
+        }
+        await initPrivateModules(data.session.user);
+      } else showLoginMode();
+    })();
+    try{return await sessionInitPromise;}
+    catch(err){
+      console.error('Error al cargar el panel privado:',err);
+      say('Tu acceso fue reconocido, pero no pudimos cargar el panel. Recarga la página e inténtalo nuevamente.','error');
+    } finally {
+      sessionInitPromise=null;
+    }
   }
 
   if(!cfg.url||!cfg.anonKey||cfg.anonKey.includes('PEGAR_AQUI')){say('Falta conectar Supabase para activar el acceso.','error');return;}
@@ -335,10 +347,10 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
   const initialType=urlAuthType();
   if(initialType) showPasswordMode(initialType);
 
-  sb.auth.onAuthStateChange(async(event)=>{
+  sb.auth.onAuthStateChange((event)=>{
     if(event==='PASSWORD_RECOVERY') showPasswordMode('recovery');
     else if(event==='SIGNED_IN' && urlAuthType()==='invite') showPasswordMode('invite');
-    else if(!settingPassword) await showSession();
+    else if(!settingPassword) setTimeout(()=>{void showSession();},0);
   });
 
   setTimeout(async()=>{
