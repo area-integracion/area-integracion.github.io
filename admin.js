@@ -245,6 +245,7 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
     const visibility={
       agendaShortcut:canManageAgenda,
       adviceShortcut:isAdmin||roles.includes('instructor')||canManageAdvice,
+      instructorsShortcut:isAdmin||roles.includes('instructor')||canManageAdvice,
       eventsShortcut:isAdmin,
       donationsShortcut:isAdmin||roles.includes('encargado_donaciones')||canModule(pDonaciones),
       areasShortcut:isAdmin,
@@ -675,5 +676,5 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
   } else {let r=id?await db.from(d.table).update(p).eq('id',id):await db.from(d.table).insert(p);if(r.error)throw r.error;}
   m.textContent='Guardado ✓';m.className='auth-msg success';await load();setTimeout(()=>modal.hidden=true,450);}catch(err){m.textContent='No se pudo guardar: '+(err?.message||err);m.className='auth-msg error';}}
  async function removeRecord(r){ if(!r||!confirm(`¿Eliminar ${mode==='advice'?'este instructor':mode==='readings'?'esta lectura':'este evento'}?`))return; try{ if(mode==='advice'){const x=await db.rpc('admin_eliminar_instructor',{p_instructor_id:Number(r.id)}); if(x.error)throw x.error;} else if(mode==='events'){const x=await db.from('eventos').delete().eq('id',r.id); if(x.error)throw x.error;} else if(mode==='readings'){await db.from('lecturas_virtudes').delete().eq('lectura_id',r.id); const x=await db.from('lecturas').delete().eq('id',r.id); if(x.error)throw x.error;} await load(); }catch(err){alert('No se pudo eliminar: '+(err?.message||err));} }
- $('#areasShortcut')?.addEventListener('click',()=>open('areas'));$('#virtuesShortcut')?.addEventListener('click',()=>open('virtues'));$('#eventsShortcut')?.addEventListener('click',()=>open('events'));$('#donationsShortcut')?.addEventListener('click',()=>open('donations'));$('#readingsShortcut')?.addEventListener('click',()=>open('readings'));$('#adviceShortcut')?.addEventListener('click',()=>open('advice'));$('#cmAdd').onclick=()=>edit();$('#cmSearch').oninput=render;$('#cmClose').onclick=$('#cmCancel').onclick=()=>modal.hidden=true;modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true});$('#cmForm').onsubmit=save;
+ $('#areasShortcut')?.addEventListener('click',()=>open('areas'));$('#virtuesShortcut')?.addEventListener('click',()=>open('virtues'));$('#eventsShortcut')?.addEventListener('click',()=>open('events'));$('#donationsShortcut')?.addEventListener('click',()=>open('donations'));$('#readingsShortcut')?.addEventListener('click',()=>open('readings'));$('#instructorsShortcut')?.addEventListener('click',async()=>{await open('advice');setAdviceView('instructors');});$('#adviceShortcut')?.addEventListener('click',()=>open('advice'));$('#cmAdd').onclick=()=>edit();$('#cmSearch').oninput=render;$('#cmClose').onclick=$('#cmCancel').onclick=()=>modal.hidden=true;modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true});$('#cmForm').onsubmit=save;
 })();
