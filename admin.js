@@ -262,7 +262,7 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
     const pm=document.querySelector('#personMsg'); pm.textContent='Guardando…'; pm.className='auth-msg';
     const id=document.querySelector('#personId').value.trim()||null;
     const dni=document.querySelector('#personDni').value.trim(), password=document.querySelector('#personPassword').value;
-    if(dni && !/^\\d{8}$/.test(dni)){pm.textContent='El DNI debe tener exactamente 8 dígitos.';pm.className='auth-msg error';return;}
+    if(dni && !/^\d{8}$/.test(dni)){pm.textContent='El DNI debe tener exactamente 8 dígitos.';pm.className='auth-msg error';return;}
     if(password && password.length<10){pm.textContent='La contraseña debe tener al menos 10 caracteres.';pm.className='auth-msg error';return;}
     if(password && !dni){pm.textContent='Para crear o restablecer el acceso, primero ingresa el DNI.';pm.className='auth-msg error';return;}
     const payload={nombre_apellido:document.querySelector('#personName').value.trim(),correo:document.querySelector('#personEmail').value.trim()||null,whatsapp:document.querySelector('#personWhatsapp').value.trim()||null,dni:dni||null,activo:document.querySelector('#personActive').checked,updated_at:new Date().toISOString()};
