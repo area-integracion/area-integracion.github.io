@@ -632,6 +632,27 @@ dest.querySelectorAll('[data-alt-delete]').forEach(b=>{
       calendarSection.append(googleBox);
       fields.append(calendarSection);
     }
+    if(r?.id){
+      const requestsSection=document.createElement('section');
+      requestsSection.className='cm-field';
+      requestsSection.style.cssText='border-top:1px solid #ddd1b9;padding-top:18px;margin-top:16px';
+      requestsSection.innerHTML='<strong>Solicitudes de asesoría</strong><p class="admin-dev-note">Solicitudes enviadas por personas interesadas en recibir una asesoría con este instructor.</p><div data-instructor-requests><p class="admin-dev-note">Cargando solicitudes…</p></div>';
+      fields.append(requestsSection);
+      const requestsBox=requestsSection.querySelector('[data-instructor-requests]');
+      const requestsResult=await db.rpc('listar_solicitudes_horario_panel');
+      if(requestsResult.error){
+        requestsBox.innerHTML='<p class="admin-dev-note">No se pudieron cargar las solicitudes: '+esc2(requestsResult.error.message)+'</p>';
+      }else{
+        const ownRequests=(requestsResult.data||[]).filter(x=>Number(x.instructor_id)===Number(r.id));
+        requestsBox.innerHTML=ownRequests.length?ownRequests.map(x=>{
+          const date=new Date(String(x.fecha_preferida)+'T12:00:00').toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long'});
+          const status=String(x.estado||'pendiente').toLowerCase();
+          const phone=String(x.whatsapp_persona||'').replace(/\\D/g,'');
+          const wa=phone.length===9?'51'+phone:phone;
+          return '<div class="activity-admin-row" style="align-items:center"><div class="cm-wide"><div class="cm-row-title">'+esc2(x.nombre_persona||'Solicitud')+'</div><div class="cm-row-sub">'+esc2(date)+' · '+esc2(String(x.hora_preferida||'').slice(0,5))+' · '+esc2(status.charAt(0).toUpperCase()+status.slice(1))+(x.whatsapp_persona?' · '+esc2(x.whatsapp_persona):'')+'</div>'+(x.mensaje?'<div class="cm-row-sub" style="margin-top:5px">“'+esc2(x.mensaje)+'”</div>':'')+'</div><div class="activity-admin-actions">'+(wa?'<a class="mini-btn" target="_blank" rel="noopener" href="https://wa.me/'+wa+'">WhatsApp</a>':'')+'</div></div>';
+        }).join(''):'<div class="empty-people">Este instructor aún no tiene solicitudes de asesoría.</div>';
+      }
+    }
     if(r?.id && (window.__naIsAdmin || (window.__naRoles||[]).includes('responsable_asesorias'))){
       const access=document.createElement('section');
       access.className='cm-field';
