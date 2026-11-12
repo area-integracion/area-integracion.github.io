@@ -235,7 +235,10 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
     const canArea=pAreas.some(canModule);
     window.__naModulePerms={talleres:canModule(pTalleres),donaciones:canModule(pDonaciones),lecturas:canModule(pLecturas),asesorias:canModule(pAsesorias),virtudes:canModule(pVirtudes),talleres_virtudes:canModule(pTalleresVirtudes),areas:Object.fromEntries(areaIds.map((id,i)=>[id,canModule(pAreas[i])]))};
     // Un instructor nunca se convierte en gestor por tener acceso al módulo Asesorías. Solo el rol explícito responsable_asesorias (o administrador) habilita la vista global.
-    window.__naInstructorOnly=!isAdmin&&roles.includes('instructor')&&!roles.includes('responsable_asesorias');
+    const ownInstructor=await sb.from('instructores').select('id').eq('usuario_id',user.id).eq('activo',true).limit(1);
+    const isInstructor=roles.includes('instructor')||(!ownInstructor.error&&(ownInstructor.data||[]).length>0);
+    window.__naIsInstructor=isInstructor;
+    window.__naInstructorOnly=!isAdmin&&isInstructor&&!roles.includes('responsable_asesorias');
     canManageAgenda=isAdmin||roles.includes('jefe_taller')||canModule(pTalleres)||canModule(pTalleresVirtudes);
     const canManageAdvice=isAdmin||roles.includes('responsable_asesorias')||canModule(pAsesorias);
     // Mostrar SOLO los módulos autorizados.
