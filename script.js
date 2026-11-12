@@ -213,12 +213,12 @@ mobileMenuButton.onclick=()=>{
   mobileMenuButton.setAttribute("aria-expanded",String(isOpen));
   mobileMenuButton.setAttribute("aria-label",isOpen?"Cerrar menú":"Abrir menú");
 };
-$("#nav a").forEach(link=>{
-  link.addEventListener("click",()=>{
-    mobileMenu.classList.remove("open");
-    mobileMenuButton.setAttribute("aria-expanded","false");
-    mobileMenuButton.setAttribute("aria-label","Abrir menú");
-  });
+mobileMenu.addEventListener("click",event=>{
+  const link=event.target.closest("a");
+  if(!link)return;
+  mobileMenu.classList.remove("open");
+  mobileMenuButton.setAttribute("aria-expanded","false");
+  mobileMenuButton.setAttribute("aria-label","Abrir menú");
 });
 $("#downloadAgenda").onclick=()=>alert("La agenda se actualiza automáticamente.");
 
