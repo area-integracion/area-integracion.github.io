@@ -101,15 +101,23 @@
     encargado_lecturas:'Encargado/a de lecturas', encargado_donaciones:'Encargado/a de donaciones',
     responsable_asesorias:'Responsable de asesorías'
   };
+  const MODULE_LABELS={talleres:'Talleres',donaciones:'Donaciones',lecturas:'Lecturas',asesorias:'Asesorías',virtudes:'Virtudes',talleres_virtudes:'Talleres de virtudes'};
+  const AREA_OPTIONS=[['integracion','Integración'],['tecnica','Técnica'],['difusion','Difusión'],['cafeteria','Cafetería'],['redes','Redes'],['cultura','Promoción de Cultura y Biblioteca'],['escolastica-prob','Escolástica · Probacionismo'],['escolastica-miembros','Escolástica · Miembros']];
   const ROLE_KEYS=Object.keys(ROLE_LABELS);
   const peopleModule=document.querySelector('#peopleModule'), peopleList=document.querySelector('#peopleList');
   const personModal=document.querySelector('#personModal'), personForm=document.querySelector('#personForm');
   const roleGrid=document.querySelector('#roleGrid');
-  let canManagePeople=false, peopleCache=[], respCache=[];
+  const moduleGrid=document.querySelector('#moduleGrid'), areaModuleGrid=document.querySelector('#areaModuleGrid');
+  let canManagePeople=false, peopleCache=[], respCache=[], moduleRespCache=[];
 
   function esc(v){return String(v??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));}
   function roleInputs(selected=[]){
     roleGrid.innerHTML=ROLE_KEYS.map(k=>`<label class="role-option"><input type="checkbox" name="roles" value="${k}" ${selected.includes(k)?'checked':''}> <span>${ROLE_LABELS[k]}</span></label>`).join('');
+  }
+  function moduleInputs(personId=null){
+    const assigned=moduleRespCache.filter(x=>String(x.persona_id)===String(personId));
+    moduleGrid.innerHTML=Object.entries(MODULE_LABELS).map(([k,label])=>`<label class="role-option"><input type="checkbox" name="modules" value="${k}" ${assigned.some(x=>x.modulo===k)?'checked':''}> <span>${label}</span></label>`).join('');
+    areaModuleGrid.innerHTML=AREA_OPTIONS.map(([k,label])=>`<label class="role-option"><input type="checkbox" name="areas" value="${k}" ${assigned.some(x=>x.modulo==='area'&&x.area_id===k)?'checked':''}> <span>${label}</span></label>`).join('');
   }
   function openPerson(person=null){
     personForm.reset(); document.querySelector('#personActive').checked=true; document.querySelector('#personMsg').textContent='';
@@ -118,9 +126,11 @@
     document.querySelector('#personName').value=person?.nombre_apellido||'';
     document.querySelector('#personEmail').value=person?.correo||'';
     document.querySelector('#personWhatsapp').value=person?.whatsapp||'';
+    document.querySelector('#personDni').value=person?.dni||'';
+    document.querySelector('#personPassword').value='';
     document.querySelector('#personActive').checked=person?person.activo!==false:true;
     const selected=person?respCache.filter(r=>r.persona_id===person.id).map(r=>r.responsabilidad):[];
-    roleInputs(selected); personModal.hidden=false;
+    roleInputs(selected); moduleInputs(person?.id||null); personModal.hidden=false;
   }
   function closePerson(){personModal.hidden=true;}
   function renderPeople(){
@@ -129,13 +139,13 @@
       const roles=respCache.filter(r=>r.persona_id===p.id).map(r=>r.responsabilidad);
       return `<div class="person-row">
         <div><div class="person-name">${esc(p.nombre_apellido)}</div><span class="status-chip ${p.activo?'':'off'}">${p.activo?'Activa':'Inactiva'}</span></div>
-        <div class="person-contact">${p.correo?esc(p.correo):'<em>Sin correo todavía</em>'}<br>${p.whatsapp?'WhatsApp: '+esc(p.whatsapp):''}</div>
+        <div class="person-contact">${p.dni?'DNI: '+esc(p.dni):'<em>Sin DNI</em>'}<br>${p.correo?esc(p.correo):'<em>Sin correo</em>'}<br>${p.whatsapp?'WhatsApp: '+esc(p.whatsapp):''}</div>
         <div class="role-chips">${roles.length?roles.map(r=>`<span class="role-chip">${esc(ROLE_LABELS[r]||r)}</span>`).join(''):'<span class="role-chip">Sin responsabilidades</span>'}</div>
-        <div class="person-row-actions"><button class="mini-btn" data-edit="${p.id}">Editar</button><button class="mini-btn" data-invite="${p.id}">${p.usuario_id?'Reenviar acceso':'Enviar acceso'}</button><button class="mini-btn danger-btn" data-delete-person="${p.id}">Eliminar</button></div>
+        <div class="person-row-actions"><button class="mini-btn" data-edit="${p.id}">Editar</button><button class="mini-btn" data-invite="${p.id}">Acceso DNI</button><button class="mini-btn danger-btn" data-delete-person="${p.id}">Eliminar</button></div>
       </div>`;
     }).join('');
     peopleList.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openPerson(peopleCache.find(p=>String(p.id)===String(b.dataset.edit))));
-    peopleList.querySelectorAll('[data-invite]').forEach(b=>b.onclick=()=>invitePerson(b.dataset.invite,b));
+    peopleList.querySelectorAll('[data-invite]').forEach(b=>b.onclick=()=>openPerson(peopleCache.find(p=>String(p.id)===String(b.dataset.invite))));
     peopleList.querySelectorAll('[data-delete-person]').forEach(b=>b.onclick=()=>deletePerson(b.dataset.deletePerson));
   }
 
@@ -190,12 +200,13 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
 
   async function loadPeople(){
     peopleList.innerHTML='<p class="admin-dev-note">Cargando personas…</p>';
-    const [a,b]=await Promise.all([
-      sb.from('personas').select('id,nombre_apellido,correo,whatsapp,activo,usuario_id,created_at').order('nombre_apellido'),
-      sb.from('responsabilidades_persona').select('id,persona_id,responsabilidad')
+    const [a,b,c]=await Promise.all([
+      sb.from('personas').select('id,nombre_apellido,correo,whatsapp,dni,activo,usuario_id,created_at').order('nombre_apellido'),
+      sb.from('responsabilidades_persona').select('id,persona_id,responsabilidad'),
+      sb.from('responsabilidades_modulo').select('id,persona_id,modulo,area_id')
     ]);
-    if(a.error||b.error){peopleList.innerHTML=`<div class="empty-people">No pudimos cargar Personas y permisos.<br><small>${esc(a.error?.message||b.error?.message||'')}</small></div>`;return;}
-    peopleCache=a.data||[];respCache=b.data||[];renderPeople();
+    if(a.error||b.error||c.error){peopleList.innerHTML=`<div class="empty-people">No pudimos cargar Personas y permisos.<br><small>${esc(a.error?.message||b.error?.message||c.error?.message||'')}</small></div>`;return;}
+    peopleCache=a.data||[];respCache=b.data||[];moduleRespCache=c.data||[];renderPeople();
   }
   async function initPrivateModules(user){
     // V37L3: comprobación segura del rol sin depender del SELECT/RLS de roles_usuario.
@@ -210,19 +221,30 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
     window.__naIsAdmin=isAdmin;
     window.__naRoles=isAdmin?['administrador']:roles;
     canManagePeople=isAdmin;
-    canManageAgenda=isAdmin || roles.includes('jefe_taller');
-
+    const [pTalleres,pDonaciones,pLecturas,pAsesorias,pVirtudes,pTalleresVirtudes,...pAreas]=await Promise.all([
+      sb.rpc('puede_gestionar_modulo',{p_modulo:'talleres'}),
+      sb.rpc('puede_gestionar_modulo',{p_modulo:'donaciones'}),
+      sb.rpc('puede_gestionar_modulo',{p_modulo:'lecturas'}),
+      sb.rpc('puede_gestionar_modulo',{p_modulo:'asesorias'}),
+      sb.rpc('puede_gestionar_modulo',{p_modulo:'virtudes'}),
+      sb.rpc('puede_gestionar_modulo',{p_modulo:'talleres_virtudes'}),
+      ...[['integracion','tecnica','difusion','cafeteria','redes','cultura','escolastica-prob','escolastica-miembros'].map(area_id=>sb.rpc('puede_gestionar_area',{p_area_id:area_id}))]
+    ]);
+    const canModule=(r)=>!r?.error&&r.data===true;
+    const canArea=pAreas.some(canModule);
+    canManageAgenda=isAdmin||roles.includes('jefe_taller')||canModule(pTalleres)||canModule(pTalleresVirtudes);
+    const canManageAdvice=isAdmin||roles.includes('responsable_asesorias')||canModule(pAsesorias);
     // Mostrar SOLO los módulos autorizados.
     const visibility={
-      agendaShortcut: canManageAgenda,
-      adviceShortcut: isAdmin || roles.includes('instructor') || roles.includes('responsable_asesorias'),
-      bookingsShortcut: isAdmin || roles.includes('instructor') || roles.includes('responsable_asesorias'),
-      eventsShortcut: isAdmin,
-      donationsShortcut: isAdmin || roles.includes('encargado_donaciones'),
-      areasShortcut: isAdmin,
-      readingsShortcut: isAdmin || roles.includes('encargado_lecturas'),
-      peopleShortcut: isAdmin,
-      virtuesShortcut: isAdmin
+      agendaShortcut:canManageAgenda,
+      adviceShortcut:isAdmin||roles.includes('instructor')||canManageAdvice,
+      bookingsShortcut:isAdmin||roles.includes('instructor')||canManageAdvice,
+      eventsShortcut:isAdmin,
+      donationsShortcut:isAdmin||roles.includes('encargado_donaciones')||canModule(pDonaciones),
+      areasShortcut:isAdmin||canArea,
+      readingsShortcut:isAdmin||roles.includes('encargado_lecturas')||canModule(pLecturas),
+      peopleShortcut:isAdmin,
+      virtuesShortcut:isAdmin||canModule(pVirtudes)
     };
     Object.entries(visibility).forEach(([id,ok])=>{const el=document.getElementById(id);if(el)el.hidden=!ok;});
 
@@ -239,34 +261,33 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
     e.preventDefault(); if(!canManagePeople)return;
     const pm=document.querySelector('#personMsg'); pm.textContent='Guardando…'; pm.className='auth-msg';
     const id=document.querySelector('#personId').value.trim()||null;
-    const payload={
-      nombre_apellido:document.querySelector('#personName').value.trim(),
-      correo:document.querySelector('#personEmail').value.trim()||null,
-      whatsapp:document.querySelector('#personWhatsapp').value.trim()||null,
-      activo:document.querySelector('#personActive').checked,
-      updated_at:new Date().toISOString()
-    };
+    const dni=document.querySelector('#personDni').value.trim(), password=document.querySelector('#personPassword').value;
+    if(dni && !/^\\d{8}$/.test(dni)){pm.textContent='El DNI debe tener exactamente 8 dígitos.';pm.className='auth-msg error';return;}
+    if(password && password.length<10){pm.textContent='La contraseña debe tener al menos 10 caracteres.';pm.className='auth-msg error';return;}
+    if(password && !dni){pm.textContent='Para crear o restablecer el acceso, primero ingresa el DNI.';pm.className='auth-msg error';return;}
+    const payload={nombre_apellido:document.querySelector('#personName').value.trim(),correo:document.querySelector('#personEmail').value.trim()||null,whatsapp:document.querySelector('#personWhatsapp').value.trim()||null,dni:dni||null,activo:document.querySelector('#personActive').checked,updated_at:new Date().toISOString()};
     const selected=[...personForm.querySelectorAll('input[name=roles]:checked')].map(x=>x.value);
+    const modules=[...personForm.querySelectorAll('input[name=modules]:checked')].map(x=>({modulo:x.value,area_id:null}));
+    const areas=[...personForm.querySelectorAll('input[name=areas]:checked')].map(x=>({modulo:'area',area_id:x.value}));
     let personId=id, res;
     if(id) res=await sb.from('personas').update(payload).eq('id',id).select('id').single();
     else res=await sb.from('personas').insert(payload).select('id').single();
     if(res.error){pm.textContent='No pudimos guardar: '+res.error.message;pm.className='auth-msg error';return;}
     personId=res.data.id;
-    // V38.22: una sola RPC guarda responsabilidades, vincula el correo con Auth y sincroniza roles.
-    // El navegador ya no escribe directamente en roles_usuario.
-    const sync=await sb.rpc('admin_guardar_responsabilidades_persona',{
-      p_persona_id:Number(personId),
-      p_roles:selected
-    });
-    if(sync.error){
-      pm.textContent='La persona se guardó, pero no pudimos actualizar sus permisos de acceso: '+sync.error.message;
-      pm.className='auth-msg error';
-      return;
+    const sync=await sb.rpc('admin_guardar_responsabilidades_persona',{p_persona_id:Number(personId),p_roles:selected});
+    if(sync.error){pm.textContent='La persona se guardó, pero no pudimos actualizar sus roles: '+sync.error.message;pm.className='auth-msg error';return;}
+    const moduleSync=await sb.rpc('admin_guardar_responsabilidades_modulo',{p_persona_id:Number(personId),p_asignaciones:[...modules,...areas]});
+    if(moduleSync.error){pm.textContent='La persona se guardó, pero no pudimos guardar sus responsabilidades por módulo: '+moduleSync.error.message;pm.className='auth-msg error';return;}
+    if(password){
+      try{
+        const sessionResult=await sb.auth.getSession(), accessToken=sessionResult.data?.session?.access_token;
+        if(!accessToken)throw new Error('La sesión administrativa expiró. Vuelve a ingresar.');
+        const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey,'Authorization':'Bearer '+accessToken},body:JSON.stringify({action:'create_person_account',persona_id:Number(personId),dni,password})});
+        const result=await response.json();if(!response.ok)throw new Error(result.error||'No se pudo crear o actualizar la cuenta.');
+      }catch(err){pm.textContent='La persona y sus permisos se guardaron, pero el acceso no se pudo crear: '+(err.message||err);pm.className='auth-msg error';return;}
     }
-    const linked=sync.data?.linked===true;
-    const savedPerson={correo:payload.correo};
-    pm.textContent=savedPerson?.correo?'Guardado y permisos actualizados ✓':'Guardado correctamente ✓';pm.className='auth-msg success';
-    await loadPeople(); setTimeout(closePerson,650);
+    pm.textContent=password?'Persona, responsabilidades y acceso DNI guardados ✓':'Persona y responsabilidades guardadas ✓';pm.className='auth-msg success';
+    await loadPeople();setTimeout(closePerson,900);
   };
   document.querySelector('#peopleShortcut').onclick=()=>{if(canManagePeople)peopleModule.scrollIntoView({behavior:'smooth'});};
 
