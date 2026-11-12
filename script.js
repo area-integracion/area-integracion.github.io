@@ -423,8 +423,35 @@ function renderSchoolGallery(){
 function openGallery(index){
   const photos=galleryPhotos(); if(!photos.length)return; galleryIndex=(index+photos.length)%photos.length;
   let box=$(".gallery-lightbox");
-  if(!box){box=document.createElement("div");box.className="gallery-lightbox";box.innerHTML=`<button class="gallery-close" aria-label="Cerrar">×</button><button class="gallery-nav gallery-prev" aria-label="Anterior">‹</button><img alt="Fotografía ampliada"><button class="gallery-nav gallery-next" aria-label="Siguiente">›</button><div class="gallery-counter"></div>`;document.body.appendChild(box);box.querySelector(".gallery-close").onclick=closeGallery;box.querySelector(".gallery-prev").onclick=e=>{e.stopPropagation();openGallery(galleryIndex-1)};box.querySelector(".gallery-next").onclick=e=>{e.stopPropagation();openGallery(galleryIndex+1)};box.onclick=e=>{if(e.target===box)closeGallery()};}
-  box.querySelector("img").src=gallerySrc(photos[galleryIndex]); box.querySelector(".gallery-counter").textContent=`${galleryIndex+1} / ${photos.length}`; document.body.classList.add("gallery-open");
+  if(!box){
+    box=document.createElement("div");box.className="gallery-lightbox";
+    box.innerHTML=`<button class="gallery-close" aria-label="Cerrar">×</button><button class="gallery-nav gallery-prev" aria-label="Anterior">‹</button><img alt="Fotografía ampliada"><button class="gallery-nav gallery-next" aria-label="Siguiente">›</button><div class="gallery-counter"></div>`;
+    document.body.appendChild(box);
+    box.querySelector(".gallery-close").onclick=closeGallery;
+    box.querySelector(".gallery-prev").onclick=e=>{e.stopPropagation();openGallery(galleryIndex-1)};
+    box.querySelector(".gallery-next").onclick=e=>{e.stopPropagation();openGallery(galleryIndex+1)};
+    box.onclick=e=>{if(e.target===box)closeGallery()};
+    const img=box.querySelector("img");
+    img.style.touchAction="pan-y pinch-zoom";
+    let startX=0,startY=0,tracking=false;
+    box.addEventListener("pointerdown",e=>{
+      if(e.pointerType!=="touch" || !e.isPrimary || e.target!==img){tracking=false;return;}
+      startX=e.clientX;startY=e.clientY;tracking=true;
+    },{passive:true});
+    box.addEventListener("pointerup",e=>{
+      if(!tracking || e.pointerType!=="touch")return;
+      tracking=false;
+      const dx=e.clientX-startX,dy=e.clientY-startY;
+      if(Math.abs(dx)>=65 && Math.abs(dx)>Math.abs(dy)*1.35){
+        openGallery(galleryIndex+(dx<0?1:-1));
+      }
+    },{passive:true});
+    box.addEventListener("pointercancel",()=>{tracking=false},{passive:true});
+    box.addEventListener("pointerdown",e=>{if(e.pointerType==="touch" && !e.isPrimary)tracking=false},{passive:true});
+  }
+  box.querySelector("img").src=gallerySrc(photos[galleryIndex]);
+  box.querySelector(".gallery-counter").textContent=`${galleryIndex+1} / ${photos.length}`;
+  document.body.classList.add("gallery-open");
 }
 function closeGallery(){ $(".gallery-lightbox")?.remove(); document.body.classList.remove("gallery-open"); }
 document.addEventListener("keydown",e=>{if($(".gallery-lightbox")){if(e.key==="Escape")closeGallery();if(e.key==="ArrowLeft")openGallery(galleryIndex-1);if(e.key==="ArrowRight")openGallery(galleryIndex+1);}});
