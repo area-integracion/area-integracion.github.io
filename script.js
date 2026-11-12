@@ -207,7 +207,19 @@ $("#virtueBtn").onclick=()=>searchVirtue();
 $("#virtueInput").addEventListener("input",e=>searchVirtue(e.target.value));
 $$("[data-close]").forEach(x=>x.onclick=closeModal);
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
-$("#menuBtn").onclick=()=>$("#nav").classList.toggle("open");
+const mobileMenu=$("#nav"),mobileMenuButton=$("#menuBtn");
+mobileMenuButton.onclick=()=>{
+  const isOpen=mobileMenu.classList.toggle("open");
+  mobileMenuButton.setAttribute("aria-expanded",String(isOpen));
+  mobileMenuButton.setAttribute("aria-label",isOpen?"Cerrar menú":"Abrir menú");
+};
+$("#nav a").forEach(link=>{
+  link.addEventListener("click",()=>{
+    mobileMenu.classList.remove("open");
+    mobileMenuButton.setAttribute("aria-expanded","false");
+    mobileMenuButton.setAttribute("aria-label","Abrir menú");
+  });
+});
 $("#downloadAgenda").onclick=()=>alert("La agenda se actualiza automáticamente.");
 
 
