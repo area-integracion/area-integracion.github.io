@@ -49,7 +49,7 @@ function occurrence(id,date){const a=ACTIVIDADES_RECURRENTES.find(x=>x.id===id);
 
 function eventHTML(a){
  if(a.esImportante){
-   const poster=a.foto?`img/eventos/${a.foto}`:"";
+   const poster=eventImageSrc(a.foto);
    return `<button class="event-card important-week-card" data-important-week="${poster}">
      ${poster?`<div class="event-img" style="background-image:url('${poster}')"></div>`:""}
      <div class="event-body"><span class="special-badge">${a.tipo||"EVENTO ESPECIAL"}</span>
@@ -284,7 +284,7 @@ function renderSummaryView(mode){
     </div>`;
 
   $$("[data-summary]").forEach(b=>b.onclick=()=>openActivity(b.dataset.summary,nextDate(b.dataset.summary)));
-  $$("[data-important-poster]").forEach(b=>b.onclick=()=>openPoster(`img/eventos/${b.dataset.importantPoster}`));
+  $("[data-important-poster]").forEach(b=>b.onclick=()=>{const ev=(typeof EVENTOS_IMPORTANTES!=="undefined"?EVENTOS_IMPORTANTES:[]).find(x=>String(x.id)===String(b.dataset.importantPoster));if(ev)openPoster(eventImageSrc(ev.foto));});
 }
 function setAgendaView(view,btn){
   setActiveView(btn);
