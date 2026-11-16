@@ -242,7 +242,7 @@ function recurringSummaryCard(a){
 }
 function importantMiniCard(e){
   const d=parseDate(e.fecha);
-  return `<button class="summary-event-card special-summary" data-important-poster="${e.foto||""}">
+  return `<button class="summary-event-card special-summary" data-important-poster="${eventImageSrc(e.foto)}">
     <div class="summary-event-img" style="background-image:url('${eventImageSrc(e.foto)}')"></div>
     <div class="summary-event-copy">
       <span class="eyebrow">${e.tipo||"EVENTO IMPORTANTE"}</span>
