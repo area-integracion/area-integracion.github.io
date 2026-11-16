@@ -40,9 +40,15 @@
       if(data.session){
         login.hidden=true; panel.hidden=false;
         if(sessionLabel){
-          sessionLabel.textContent=data.session.user.email||'';
-          const {data:instructor,error:instructorError}=await sb.from('instructores').select('nombre').eq('usuario_id',data.session.user.id).limit(1).maybeSingle();
-          if(!instructorError && instructor?.nombre) sessionLabel.textContent='Instructor: '+instructor.nombre;
+          // Mostrar el nombre de la persona, nunca el correo técnico generado para el acceso por DNI.
+          sessionLabel.textContent='';
+          const {data:persona,error:personaError}=await sb.from('personas').select('nombre_apellido').eq('usuario_id',data.session.user.id).limit(1).maybeSingle();
+          if(!personaError && persona?.nombre_apellido){
+            sessionLabel.textContent=persona.nombre_apellido;
+          }else{
+            const {data:instructor,error:instructorError}=await sb.from('instructores').select('nombre').eq('usuario_id',data.session.user.id).limit(1).maybeSingle();
+            if(!instructorError && instructor?.nombre) sessionLabel.textContent='Instructor: '+instructor.nombre;
+          }
         }
         await initPrivateModules(data.session.user);
       } else showLoginMode();
