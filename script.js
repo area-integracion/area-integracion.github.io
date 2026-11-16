@@ -284,7 +284,7 @@ function renderSummaryView(mode){
     </div>`;
 
   $$("[data-summary]").forEach(b=>b.onclick=()=>openActivity(b.dataset.summary,nextDate(b.dataset.summary)));
-  $("[data-important-poster]").forEach(b=>b.onclick=()=>{const ev=(typeof EVENTOS_IMPORTANTES!=="undefined"?EVENTOS_IMPORTANTES:[]).find(x=>String(x.id)===String(b.dataset.importantPoster));if(ev)openPoster(eventImageSrc(ev.foto));});
+  $("[data-important-poster]").forEach(b=>b.onclick=()=>openPoster(b.dataset.importantPoster));
 }
 function setAgendaView(view,btn){
   setActiveView(btn);
