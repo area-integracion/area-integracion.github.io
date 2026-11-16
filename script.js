@@ -323,7 +323,7 @@ function openEventDetails(id){
   if(!e)return;
   const d=parseDate(e.fecha), img=eventImageSrc(e.foto);
   const pago=e.modalidad_pago==='De pago'||Number(e.costo)>0;
-  const acceso=e.solo_miembros?'Solo para miembros':'Abierto';
+  const acceso=e.solo_miembros?'Solo para miembros':'Ingreso libre';
   const costo=pago?(e.costo?`S/ ${Number(e.costo).toFixed(2).replace('.00','')}`:'De pago'):'Gratuito';
   const rawWa=String(e.whatsapp||'').replace(/\D/g,''); const waNum=rawWa.length===9?'51'+rawWa:rawWa; const wa=waNum?`<a class="event-detail-cta" target="_blank" rel="noopener" href="https://wa.me/${waNum}?text=${encodeURIComponent('Hola, vi el evento '+(e.titulo||e.nombre||'')+' en la página de Nueva Acrópolis y quisiera más información.')}">Consultar por WhatsApp</a>`:'';
   const modal=document.createElement('div'); modal.className='event-detail-modal';
