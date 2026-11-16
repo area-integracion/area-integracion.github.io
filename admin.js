@@ -297,6 +297,14 @@ Se quitarán sus responsabilidades y ya no tendrá acceso a los módulos asignad
     if(sync.error){pm.textContent='La persona se guardó, pero no pudimos actualizar sus roles: '+sync.error.message;pm.className='auth-msg error';return;}
     const moduleSync=await sb.rpc('admin_guardar_responsabilidades_modulo',{p_persona_id:Number(personId),p_asignaciones:[...modules,...areas]});
     if(moduleSync.error){pm.textContent='La persona se guardó, pero no pudimos guardar sus responsabilidades por módulo: '+moduleSync.error.message;pm.className='auth-msg error';return;}
+    if(dni&&!password){
+      try{
+        const sessionResult=await sb.auth.getSession(), accessToken=sessionResult.data?.session?.access_token;
+        if(!accessToken)throw new Error('La sesión administrativa expiró. Vuelve a ingresar.');
+        const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey,'Authorization':'Bearer '+accessToken},body:JSON.stringify({action:'sync_person_roles',persona_id:Number(personId)})});
+        const result=await response.json();if(!response.ok||!result.ok)throw new Error(result.error||'No se pudieron sincronizar los permisos.');
+      }catch(err){pm.textContent='La persona y sus responsabilidades se guardaron, pero no se pudieron sincronizar con su acceso: '+(err.message||err);pm.className='auth-msg error';return;}
+    }
     if(password){
       try{
         const sessionResult=await sb.auth.getSession(), accessToken=sessionResult.data?.session?.access_token;
