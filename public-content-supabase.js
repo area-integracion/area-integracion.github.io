@@ -11,7 +11,7 @@
    get('areas_contacto?select=*')
   ]);
   if(Array.isArray(ev)&&ev.length&&typeof EVENTOS_IMPORTANTES!=='undefined'){EVENTOS_IMPORTANTES.splice(0,EVENTOS_IMPORTANTES.length,...ev.map(e=>({...e,id:e.slug||String(e.id),nombre:e.nombre||e.titulo||'Evento'})));}
-  if(Array.isArray(don)&&don.length&&typeof DONACIONES_FALLBACK!=='undefined'){DONACIONES_FALLBACK.splice(0,DONACIONES_FALLBACK.length,...don);}
+  const generalDonations=Array.isArray(don)?don.filter(x=>!x.sede||x.sede==='General'):[];if(generalDonations.length&&typeof DONACIONES_FALLBACK!=='undefined'){DONACIONES_FALLBACK.splice(0,DONACIONES_FALLBACK.length,...generalDonations);}
   if(Array.isArray(lec)&&typeof LECTURAS_FALLBACK!=='undefined'){LECTURAS_FALLBACK.splice(0,LECTURAS_FALLBACK.length,...lec.map(r=>({...r,id:String(r.id),contenido:r.contenido||r.texto||'',pregunta_final:r.pregunta_final||r.reflexion||''})));}
 
   if(Array.isArray(areas)&&typeof AREAS_SERVICIO!=='undefined'){areas.forEach(c=>{const a=AREAS_SERVICIO.find(x=>x.id===c.area_id);if(a){a.encargado=c.encargado||'';a.whatsapp=c.whatsapp||'';a.fotoPortada=c.foto_portada||a.fotoPortada||'';}});if(typeof renderSpaces==='function')renderSpaces();}
