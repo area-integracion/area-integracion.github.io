@@ -17,9 +17,9 @@
    const contact=contacts.find(x=>x.clave===key)||{nombre:fallback,whatsapp:''};
    const grid=document.getElementById(gridId),contactBox=document.getElementById(contactId);
    if(!grid||!contactBox)return;
-   contactBox.hidden=false;
    let phone=String(contact.whatsapp||'').replace(/[^0-9]/g,'');if(phone.length===9)phone='51'+phone;
-   contactBox.innerHTML=phone?'<p>Responsable: <strong>'+escapeHtml(contact.nombre||fallback)+'</strong> · WhatsApp: <a href="https://wa.me/'+phone+'" target="_blank" rel="noopener">'+escapeHtml(phone)+'</a></p>':'<p>Responsable: <strong>'+escapeHtml(contact.nombre||fallback)+'</strong> · WhatsApp pendiente de actualización.</p>';
+   if(phone){contactBox.hidden=false;contactBox.innerHTML='<p>Contacto para coordinar: <a href="https://wa.me/'+phone+'" target="_blank" rel="noopener">WhatsApp</a></p>';}
+   else{contactBox.hidden=true;contactBox.innerHTML='';}
    const items=donations.filter(x=>(x.sede||'Julio Sumar')===sede);
    grid.innerHTML=items.length?items.map(x=>{
     const message=encodeURIComponent('Hola, me gustaría coordinar una donación de '+x.nombre+' para la sede '+sede+'.');
