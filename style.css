@@ -861,6 +861,9 @@ body{background:var(--paper);color:#26362f}
 .branch-donation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
 .branch-donation-item{display:flex;align-items:center;gap:13px;padding:16px;background:#fff;border:1px solid #e2d8c8;border-radius:9px;color:#173f34}
 .branch-donation-item.done{opacity:.62}
+.branch-donation-whatsapp-item,.donation-whatsapp-item{cursor:pointer;text-decoration:none;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.donation-whatsapp-item:hover,.donation-whatsapp-item:focus-visible{transform:translateY(-2px);border-color:#b58c35;box-shadow:0 5px 16px #173f3412;outline:none}
+.donation-contact-pending{margin-top:10px}
 .branch-donation-symbol{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border:1px solid #d8c9aa;border-radius:50%;color:#a77d2e;font-size:20px}
 .branch-donation-item div{display:grid;gap:4px}
 .branch-donation-item strong{font:600 19px "Cormorant Garamond",serif}
