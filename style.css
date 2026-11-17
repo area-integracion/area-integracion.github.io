@@ -848,3 +848,22 @@ body{background:var(--paper);color:#26362f}
 .event-mini-badges,.event-detail-badges{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}.event-mini-badges span,.event-detail-badges span{border:1px solid #d8c7aa;border-radius:999px;padding:6px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#715b39;background:#fbf6eb}.event-more-btn,.event-detail-cta{display:inline-block;border:0;border-radius:8px;background:#173e33;color:#fff;padding:11px 16px;font:inherit;cursor:pointer;text-decoration:none;margin-top:8px}.event-more-btn:hover,.event-detail-cta:hover{filter:brightness(1.08)}
 .event-detail-modal{position:fixed;inset:0;z-index:100000;background:rgba(12,25,21,.82);display:flex;align-items:center;justify-content:center;padding:24px}.event-detail-card{position:relative;width:min(980px,96vw);max-height:92vh;overflow:auto;display:grid;grid-template-columns:minmax(280px,42%) 1fr;background:#fffdf8;border-radius:18px}.event-detail-image{border:0;min-height:560px;background-size:cover;background-position:center;cursor:zoom-in}.event-detail-copy{padding:44px}.event-detail-copy h2{font-family:"Cormorant Garamond",serif;color:#173e33;font-size:42px;line-height:1;margin:8px 0 14px}.event-detail-full{white-space:pre-line;line-height:1.65;border-top:1px solid #e8dfd0;margin-top:18px;padding-top:18px;color:#4f5b55}.event-detail-close{position:absolute;right:14px;top:14px;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid #d9cfbf;background:#fffdf8;color:#173e33;font-size:27px;cursor:pointer}@media(max-width:700px){.event-detail-modal{padding:12px}.event-detail-card{grid-template-columns:1fr}.event-detail-image{min-height:330px;background-size:contain;background-repeat:no-repeat;background-color:#eee5d9}.event-detail-copy{padding:28px 22px}.event-detail-copy h2{font-size:34px}}
  
+
+
+/* Donaciones independientes por sede */
+.branch-donations-section{border-top:1px solid #e5dccb}
+.branch-donation-contact{max-width:760px;margin:20px auto}
+.branch-donation-responsible{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;background:#f4eddf;border-left:3px solid #b58c35;border-radius:5px}
+.branch-donation-responsible span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#82745d}
+.branch-donation-responsible strong{font:600 23px "Cormorant Garamond",serif;color:#173f34}
+.branch-donation-responsible small{font-size:12px;color:#83796a}
+.branch-donation-responsible .primary-btn{margin-left:auto}
+.branch-donation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
+.branch-donation-item{display:flex;align-items:center;gap:13px;padding:16px;background:#fff;border:1px solid #e2d8c8;border-radius:9px;color:#173f34}
+.branch-donation-item.done{opacity:.62}
+.branch-donation-symbol{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border:1px solid #d8c9aa;border-radius:50%;color:#a77d2e;font-size:20px}
+.branch-donation-item div{display:grid;gap:4px}
+.branch-donation-item strong{font:600 19px "Cormorant Garamond",serif}
+.branch-donation-item small{font-size:11px;color:#827b70}
+.branch-donation-empty{grid-column:1/-1;padding:22px;background:#fff;border:1px dashed #d8c9aa;border-radius:9px;color:#746e64;text-align:center}
+@media(max-width:650px){.branch-donation-responsible{align-items:flex-start;flex-direction:column}.branch-donation-responsible .primary-btn{margin-left:0}}
