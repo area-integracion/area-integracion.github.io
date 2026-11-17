@@ -41,7 +41,7 @@
  safe('donaciones',get('donaciones?select=*&activo=eq.true&order=sede.asc,orden.asc,id.asc'),data=>{
   if(!Array.isArray(data))return;
   donations=data;
-  const general=data.filter(x=>!x.sede||x.sede==='General');
+  const general=data.filter(x=>!x.sede||x.sede==='General'||x.sede==='San Carlos');
   if(typeof DONACIONES_FALLBACK!=='undefined')DONACIONES_FALLBACK.splice(0,DONACIONES_FALLBACK.length,...general);
   if(typeof window.NA_RENDER_DONATIONS==='function')window.NA_RENDER_DONATIONS();
   renderBranchDonations();
