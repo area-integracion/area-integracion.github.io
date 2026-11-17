@@ -80,7 +80,19 @@
   }
 
   if(!cfg.url||!cfg.anonKey||cfg.anonKey.includes('PEGAR_AQUI')){say('Falta conectar Supabase para activar el acceso.','error');return;}
-  const sb=supabase.createClient(cfg.url,cfg.anonKey);
+  // Mantener la sesión del panel en el almacenamiento persistente del navegador.
+  // Se conserva la clave estándar de Supabase para no perder sesiones ya guardadas.
+  let authStorage;
+  try{authStorage=window.localStorage;}catch(_){authStorage=undefined;}
+  const sb=supabase.createClient(cfg.url,cfg.anonKey,{
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storageKey:'sb-eefqrsxvpgwpqdlajjee-auth-token',
+      ...(authStorage?{storage:authStorage}:{})
+    }
+  });
   window.__naAdminSb=sb;
 
   let loginWithDni=false;
