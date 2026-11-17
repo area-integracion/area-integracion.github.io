@@ -38,7 +38,6 @@
       if(settingPassword) return;
       if(error) throw error;
       if(data.session){
-        login.hidden=true; panel.hidden=false;
         if(sessionLabel){
           // El perfil propio es la fuente principal: su lectura está asociada al UID autenticado.
           sessionLabel.textContent='';
@@ -58,12 +57,16 @@
           }
         }
         await initPrivateModules(data.session.user);
-      } else showLoginMode();
+        login.hidden=true; panel.hidden=false;
+        return true;
+      } else { showLoginMode(); return false; }
     })();
     try{return await sessionInitPromise;}
     catch(err){
       console.error('Error al cargar el panel privado:',err);
-      say('Tu acceso fue reconocido, pero no pudimos cargar el panel. Recarga la página e inténtalo nuevamente.','error');
+      showLoginMode();
+      say('Tu acceso fue reconocido, pero el panel no pudo terminar de cargar: '+(err?.message||'Error inesperado')+'. Vuelve a intentarlo.','error');
+      return false;
     } finally {
       sessionInitPromise=null;
     }
@@ -103,12 +106,12 @@
         });
         if(authResult.error) throw authResult.error;
       }
-      say('Acceso confirmado. Abriendo el panel…','success');
-      await showSession();
+      say('Acceso confirmado. Preparando tus permisos y módulos…','success');
+      const opened=await showSession();
+      if(!opened) return;
       const {data:{session},error:sessionError}=await sb.auth.getSession();
       if(sessionError) throw sessionError;
       if(!session) throw new Error('La sesión no quedó guardada. Vuelve a intentarlo.');
-      login.hidden=true;panel.hidden=false;
     }catch(err){
       console.error('Error al iniciar sesión:',err);
       const detail=String(err?.message||'Error de conexión');
