@@ -210,7 +210,7 @@
     const dni=document.querySelector('#personDni').value.trim();
     const password=document.querySelector('#personPassword').value;
     const pm=document.querySelector('#personMsg');
-    if(!id||!/^\\d{8}$/.test(dni)){pm.textContent='Abre una persona existente y verifica su DNI.';pm.className='auth-msg error';return;}
+    if(!id||!/^[0-9]{8}$/.test(dni)){pm.textContent='Abre una persona existente y verifica su DNI.';pm.className='auth-msg error';return;}
     if(password.length<10||password.length>128){pm.textContent='Escribe una nueva contraseña de 10 a 128 caracteres en el campo de contraseña.';pm.className='auth-msg error';return;}
     if(!confirm('Se cambiará únicamente la contraseña de esta persona. Sus seis roles y demás datos se conservarán. ¿Continuar?'))return;
     const btn=document.querySelector('#resetPersonAccessBtn');btn.disabled=true;pm.textContent='Restableciendo contraseña…';pm.className='auth-msg';
