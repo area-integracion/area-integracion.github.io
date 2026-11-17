@@ -446,8 +446,8 @@ function setAdviceView(view){
 async function renderDonationContactEditor(){
    let box=document.querySelector('#donationContactEditor');
    if(!box){box=document.createElement('section');box.id='donationContactEditor';box.style.cssText='margin:18px 0;padding:18px;border:1px solid #d8d2c4;border-radius:14px;background:#fffdf7';list.parentNode.insertBefore(box,list);}
-   box.innerHTML='<h3>Responsables por sede</h3><p class="admin-dev-note">Malu y Angie figuran como responsables provisionales. Actualiza el nombre y WhatsApp cuando se designe a la persona definitiva.</p><div id="donationBranchContacts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px"></div>';
-   const keys=[{key:'donaciones_sumar',label:'Sede Sumar',fallback:'Malu'},{key:'donaciones_eltambo',label:'Sede El Tambo',fallback:'Angie'}];
+   box.innerHTML='<h3>Responsables por sede</h3><p class="admin-dev-note">Aquí puedes actualizar el nombre y WhatsApp de cada responsable. San Carlos conserva a Nataly como contacto registrado.</p><div id="donationBranchContacts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px"></div>';
+   const keys=[{key:'donaciones',label:'Sede San Carlos',fallback:'Nataly'},{key:'donaciones_sumar',label:'Sede Julio Sumar',fallback:'Malu'},{key:'donaciones_eltambo',label:'Sede El Tambo',fallback:'Angie'}];
    const host=box.querySelector('#donationBranchContacts');
    const q=await db.from('configuracion_contactos').select('clave,nombre,whatsapp').in('clave',keys.map(x=>x.key));
    if(q.error){host.textContent='No se pudieron cargar los contactos: '+q.error.message;return;}
