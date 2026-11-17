@@ -200,8 +200,33 @@
     document.querySelector('#personPassword').value='';
     document.querySelector('#personActive').checked=person?person.activo!==false:true;
     const selected=person?respCache.filter(r=>r.persona_id===person.id).map(r=>r.responsabilidad):[];
-    roleInputs(selected); moduleInputs(person?.id||null); personModal.hidden=false;
+    roleInputs(selected); moduleInputs(person?.id||null);
+    const resetBtn=document.querySelector('#resetPersonAccessBtn');
+    if(resetBtn)resetBtn.hidden=!(person?.id && person?.dni);
+    personModal.hidden=false;
   }
+  document.querySelector('#resetPersonAccessBtn')?.addEventListener('click',async()=>{
+    const id=Number(document.querySelector('#personId').value);
+    const dni=document.querySelector('#personDni').value.trim();
+    const password=document.querySelector('#personPassword').value;
+    const pm=document.querySelector('#personMsg');
+    if(!id||!/^\\d{8}$/.test(dni)){pm.textContent='Abre una persona existente y verifica su DNI.';pm.className='auth-msg error';return;}
+    if(password.length<10||password.length>128){pm.textContent='Escribe una nueva contraseña de 10 a 128 caracteres en el campo de contraseña.';pm.className='auth-msg error';return;}
+    if(!confirm('Se cambiará únicamente la contraseña de esta persona. Sus seis roles y demás datos se conservarán. ¿Continuar?'))return;
+    const btn=document.querySelector('#resetPersonAccessBtn');btn.disabled=true;pm.textContent='Restableciendo contraseña…';pm.className='auth-msg';
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(!session)throw new Error('La sesión administrativa expiró. Vuelve a ingresar.');
+      const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify({action:'reset_person_password',persona_id:id,dni,password})});
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok||!result.ok)throw new Error(result.error||'No se pudo restablecer la contraseña.');
+      document.querySelector('#personPassword').value='';
+      pm.textContent=result.linked?'Contraseña restablecida y cuenta original vinculada. Los permisos se conservaron.':'Contraseña restablecida. Los permisos se conservaron.';
+      pm.className='auth-msg success';
+      await loadPeople();
+    }catch(err){pm.textContent=err.message||'No se pudo restablecer la contraseña.';pm.className='auth-msg error';}
+    finally{btn.disabled=false;}
+  });
   function closePerson(){personModal.hidden=true;}
   function renderPeople(){
     if(!peopleCache.length){peopleList.innerHTML='<div class="empty-people"><strong>Aún no hay personas registradas.</strong><br>Pulsa “+ Agregar persona” para hacer nuestra primera prueba.</div>';return;}
