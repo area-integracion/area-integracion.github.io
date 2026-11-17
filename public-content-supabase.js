@@ -26,7 +26,7 @@
     const inner='<span class="branch-donation-symbol">'+(x.conseguido?'✓':'✧')+'</span><div><strong>'+escapeHtml(x.nombre)+'</strong><small>'+escapeHtml(x.categoria||'Donación')+' · '+(x.conseguido?'Ya fue conseguido':'Necesario')+'</small></div>';
     return phone?'<a class="branch-donation-item donation-whatsapp-item '+(x.conseguido?'done':'')+'" href="https://wa.me/'+phone+'?text='+message+'" target="_blank" rel="noopener" aria-label="Coordinar donación de '+escapeHtml(x.nombre)+' por WhatsApp">'+inner+'</a>':'<article class="branch-donation-item '+(x.conseguido?'done':'')+'">'+inner+'</article>';
    }).join(''):'<p class="branch-donation-empty">Por ahora no hay necesidades publicadas para esta sede. Cuando se requiera algún material, aquí se indicará qué puedes donar.</p>';
-   if(!phone&&items.length)grid.insertAdjacentHTML('beforeend','<p class="branch-donation-empty donation-contact-pending">El contacto para coordinar estas donaciones está pendiente de actualización.</p>');
+
   };
   draw('Julio Sumar','donationGridSumar','donationContactSumar','donaciones_sumar','Malu');
   draw('El Tambo','donationGridTambo','donationContactTambo','donaciones_eltambo','Angie');
