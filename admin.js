@@ -80,22 +80,45 @@
   byEmail.onclick=()=>selectLoginMethod(false);
   byDni.onclick=()=>selectLoginMethod(true);
   form.onsubmit=async e=>{
-    e.preventDefault(); say('Ingresando…');
-    let error;
-    if(loginWithDni){
-      try{
-        const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey},body:JSON.stringify({action:'login',dni:dniInput.value.trim(),password:loginPassword.value})});
-        const result=await response.json();
-        if(!response.ok||!result.session)throw new Error('DNI o contraseña incorrectos.');
-        const authResult=await sb.auth.setSession({access_token:result.session.access_token,refresh_token:result.session.refresh_token});
-        error=authResult.error;
-      }catch(ex){error=ex;}
-    }else{
-      const result=await sb.auth.signInWithPassword({email:loginEmail.value.trim(),password:loginPassword.value});
-      error=result.error;
+    e.preventDefault();
+    const submit=form.querySelector('[type="submit"]');
+    if(submit){submit.disabled=true;submit.textContent='Ingresando…';}
+    say('Verificando tus datos…');
+    try{
+      let result;
+      if(loginWithDni){
+        const response=await fetch(cfg.url+'/functions/v1/instructor-acceso',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':cfg.anonKey},
+          body:JSON.stringify({action:'login',dni:dniInput.value.trim(),password:document.querySelector('#loginPassword').value})
+        });
+        const payload=await response.json().catch(()=>({}));
+        if(!response.ok||!payload.session) throw new Error(payload.error||payload.message||'DNI o contraseña incorrectos.');
+        const authResult=await sb.auth.setSession({access_token:payload.session.access_token,refresh_token:payload.session.refresh_token});
+        if(authResult.error) throw authResult.error;
+      }else{
+        const authResult=await sb.auth.signInWithPassword({
+          email:document.querySelector('#loginEmail').value.trim(),
+          password:document.querySelector('#loginPassword').value
+        });
+        if(authResult.error) throw authResult.error;
+      }
+      say('Acceso confirmado. Abriendo el panel…','success');
+      await showSession();
+      const {data:{session},error:sessionError}=await sb.auth.getSession();
+      if(sessionError) throw sessionError;
+      if(!session) throw new Error('La sesión no quedó guardada. Vuelve a intentarlo.');
+      login.hidden=true;panel.hidden=false;
+    }catch(err){
+      console.error('Error al iniciar sesión:',err);
+      const detail=String(err?.message||'Error de conexión');
+      say(detail.toLowerCase().includes('invalid login')||detail.toLowerCase().includes('invalid credentials')
+        ?'Correo/DNI o contraseña incorrectos.'
+        :'No se pudo completar el ingreso: '+detail,'error');
+      showLoginMode();
+    }finally{
+      if(submit){submit.disabled=false;submit.textContent='Iniciar sesión';}
     }
-    if(error){say('No pudimos iniciar sesión. Revisa tu correo y contraseña.','error');return;}
-    say(''); await showSession();
   };
 
   passwordForm.onsubmit=async e=>{
