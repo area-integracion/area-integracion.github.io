@@ -56,8 +56,15 @@
             }
           }
         }
-        await initPrivateModules(data.session.user);
+        // El acceso no debe depender de que todos los módulos terminen de cargar.
+        // Primero mostramos el panel; luego inicializamos sus módulos de forma aislada.
         login.hidden=true; panel.hidden=false;
+        try{
+          await initPrivateModules(data.session.user);
+        }catch(moduleError){
+          console.error('Error al inicializar módulos del panel:',moduleError);
+          say('Ingresaste correctamente. Algunos módulos no pudieron cargar; puedes permanecer en el panel y volver a intentarlo.','error');
+        }
         return true;
       } else { showLoginMode(); return false; }
     })();
