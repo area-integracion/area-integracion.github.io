@@ -22,11 +22,19 @@
    const contact=branchContacts.find(x=>x.clave===key)||{nombre:fallback,whatsapp:''};
    const grid=document.getElementById(gridId),contactBox=document.getElementById(contactId);
    if(!grid||!contactBox)return;
-   const items=branchDonations.filter(x=>(x.sede||'Julio Sumar')===sede);
+   // El nombre del responsable se mantiene solo en el panel de gestión, nunca en la vista pública.
+   contactBox.innerHTML='';
+   contactBox.hidden=true;
    let phone=String(contact.whatsapp||'').replace(/[^0-9]/g,'');if(phone.length===9)phone='51'+phone;
-   const name=contact.nombre||fallback;
-   contactBox.innerHTML='<div class="branch-donation-responsible"><span>Responsable</span><strong>'+escapeHtml(name)+'</strong>'+(phone?'<a class="primary-btn" target="_blank" rel="noopener" href="https://wa.me/'+phone+'?text='+encodeURIComponent('Hola '+name+', me gustaría coordinar una donación para la sede '+sede+'.')+'">Coordinar por WhatsApp →</a>':'<small>Contacto pendiente de actualización</small>')+'</div>';
-   grid.innerHTML=items.length?items.map(x=>'<article class="branch-donation-item '+(x.conseguido?'done':'')+'"><span class="branch-donation-symbol">'+(x.conseguido?'✓':'✧')+'</span><div><strong>'+escapeHtml(x.nombre)+'</strong><small>'+escapeHtml(x.categoria||'Donación')+' · '+(x.conseguido?'Ya fue conseguido':'Necesario')+'</small></div></article>').join(''):'<p class="branch-donation-empty">Por ahora no hay necesidades publicadas para esta sede. Cuando se requiera algún material, aquí se indicará qué puedes donar.</p>';
+   const items=branchDonations.filter(x=>(x.sede||'Julio Sumar')===sede);
+   grid.innerHTML=items.length?items.map(x=>{
+    const message=encodeURIComponent('Hola, me gustaría coordinar una donación de '+x.nombre+' para la sede '+sede+'.');
+    const content='<span class="branch-donation-symbol">'+(x.conseguido?'✓':'✧')+'</span><div><strong>'+escapeHtml(x.nombre)+'</strong><small>'+escapeHtml(x.categoria||'Donación')+' · '+(x.conseguido?'Ya fue conseguido':'Necesario')+'</small></div>';
+    return phone
+     ?'<a class="branch-donation-item donation-whatsapp-item '+(x.conseguido?'done':'')+'" href="https://wa.me/'+phone+'?text='+message+'" target="_blank" rel="noopener" aria-label="Coordinar donación de '+escapeHtml(x.nombre)+' por WhatsApp">'+content+'</a>'
+     :'<article class="branch-donation-item '+(x.conseguido?'done':'')+'">'+content+'</article>';
+   }).join(''):'<p class="branch-donation-empty">Por ahora no hay necesidades publicadas para esta sede. Cuando se requiera algún material, aquí se indicará qué puedes donar.</p>';
+   if(!phone&&items.length)grid.insertAdjacentHTML('beforeend','<p class="branch-donation-empty donation-contact-pending">El contacto para coordinar estas donaciones está pendiente de actualización.</p>');
   };
   drawBranchDonations('Julio Sumar','donationGridSumar','donationContactSumar','donaciones_sumar','Malu');
   drawBranchDonations('El Tambo','donationGridTambo','donationContactTambo','donaciones_eltambo','Angie');
